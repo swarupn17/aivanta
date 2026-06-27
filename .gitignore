@@ -1,0 +1,17 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Dependencies / build (for future backend phase)
+node_modules/
+venv/
+.env
+__pycache__/
+
+# Never commit PII / student data files
+*student*.csv
+*students*.xlsx
+*pii*
