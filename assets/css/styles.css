@@ -128,15 +128,88 @@ select:focus-visible,
   transform: translateY(0);
 }
 
+/* ---- Smooth interactive feedback ---- */
+/* Every clickable thing eases its colour / shadow / transform changes */
+a,
+button,
+select,
+summary,
+[role="button"],
+.lift,
+input[type="submit"] {
+  transition: background-color 0.25s ease, color 0.25s ease,
+              border-color 0.25s ease, box-shadow 0.25s ease,
+              transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+  will-change: transform;
+}
+
+/* Gentle "press" when a button or CTA-style link is clicked */
+button:active,
+[role="button"]:active,
+input[type="submit"]:active,
+a[class*="bg-gold"]:active,
+a[class*="bg-navy"]:active,
+a[class*="bg-sky"]:active,
+a[class*="bg-white/"]:active,
+a[class*="bg-slate"]:active {
+  transform: scale(0.95);
+}
+
+/* Cards / tiles dip slightly when pressed */
+.lift:active { transform: translateY(-3px) scale(0.99); }
+
+/* Carousel dots + syllabus chips get a soft press too */
+.carousel-dot:active { transform: scale(0.85); }
+
+/* ---- Page fade-in on load (makes navigation feel seamless) ---- */
+@keyframes asf-page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+main { animation: asf-page-in 0.45s ease both; }
+
+/* ---- Syllabus content swap fade ---- */
+#syllabus-units {
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+#syllabus-units.is-swapping {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .ticker-track { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .carousel-slide { transition: none; }
+  main { animation: none; }
+  a, button, select, summary, [role="button"], .lift, input[type="submit"] {
+    transition: none;
+  }
+  button:active, [role="button"]:active, .lift:active,
+  a[class*="bg-"]:active { transform: none; }
+  #syllabus-units { transition: none; }
+  #syllabus-units.is-swapping { opacity: 1; transform: none; }
 }
 
 /* ---- Subject brand accents ---- */
 .subj-faa { --accent: #1A73C8; }
 .subj-cia { --accent: #0C2D6B; }
 .subj-aia { --accent: #C8960C; }
+
+/* ---- Mobile nav slide ---- */
+.asf-mnav {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.3s ease;
+}
+.asf-mnav.is-open {
+  max-height: 80vh;
+  opacity: 1;
+  overflow-y: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .asf-mnav { transition: none; }
+}

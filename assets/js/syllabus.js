@@ -182,7 +182,7 @@
     return "Advanced";
   }
 
-  function render() {
+  function paintUnits() {
     const { subject, cls } = state;
     const meta = META[subject];
     const units = SYL[subject][cls] || [];
@@ -208,7 +208,10 @@
         </div>`
       )
       .join("");
+  }
 
+  function paintControls() {
+    const { subject, cls } = state;
     document.querySelectorAll("[data-subject]").forEach((b) => {
       const on = b.getAttribute("data-subject") === subject;
       b.setAttribute("aria-pressed", String(on));
@@ -227,17 +230,43 @@
     });
   }
 
+  // First paint - no animation.
+  function render() {
+    paintControls();
+    paintUnits();
+  }
+
+  // Animated swap - controls respond instantly, cards cross-fade.
+  function update() {
+    paintControls();
+    const wrap = document.getElementById("syllabus-units");
+    if (!wrap) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      paintUnits();
+      return;
+    }
+    wrap.classList.add("is-swapping");
+    window.setTimeout(() => {
+      paintUnits();
+      // next frame so the browser registers the change before fading back in
+      window.requestAnimationFrame(() => wrap.classList.remove("is-swapping"));
+    }, 240);
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("[data-subject]").forEach((b) =>
       b.addEventListener("click", () => {
+        if (state.subject === b.getAttribute("data-subject")) return;
         state.subject = b.getAttribute("data-subject");
-        render();
+        update();
       })
     );
     document.querySelectorAll("[data-class]").forEach((b) =>
       b.addEventListener("click", () => {
+        if (state.cls === Number(b.getAttribute("data-class"))) return;
         state.cls = Number(b.getAttribute("data-class"));
-        render();
+        update();
       })
     );
     render();

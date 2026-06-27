@@ -155,7 +155,7 @@
       </div>
 
       <!-- Mobile nav -->
-      <div id="asf-mobile-nav" class="lg:hidden hidden border-t border-slate-100 bg-white max-h-[70vh] overflow-y-auto">
+      <div id="asf-mobile-nav" class="lg:hidden asf-mnav border-t border-slate-100 bg-white">
         ${mobileItems}
         <div class="p-4">
           <a href="registration.html" class="block text-center bg-[var(--asf-gold)] text-[var(--asf-navy-900)] font-bold px-4 py-3 rounded-lg">Register School</a>
@@ -248,7 +248,7 @@
     const menu = document.getElementById("asf-mobile-nav");
     if (!burger || !menu) return;
     burger.addEventListener("click", () => {
-      const open = menu.classList.toggle("hidden") === false;
+      const open = menu.classList.toggle("is-open");
       burger.setAttribute("aria-expanded", String(open));
     });
   }
