@@ -7,12 +7,26 @@
 (function () {
   "use strict";
 
-  const CONTACT = {
-    email: "info@aivantascholar.org",
-    phone: "+91 99999 00000",
-    site: "www.aivantascholar.org",
-    place: "Pimpri-Chinchwad, Pune, Maharashtra"
-  };
+  // ---- Pull everything editable from the central config (with safe fallbacks) ----
+  const CFG = window.ASF_CONFIG || {};
+  const ORG = CFG.org || {};
+  const CONTACT = Object.assign(
+    {
+      email: "info@aivantascholar.org",
+      phone: "+91 99999 00000",
+      site: "www.aivantascholar.org",
+      place: "Pimpri-Chinchwad, Pune, Maharashtra"
+    },
+    CFG.contact || {}
+  );
+  const SOCIAL = CFG.social || {};
+  const LANGS = CFG.languages || [{ code: "en", label: "EN", active: true }];
+  const LEGAL = CFG.legal || { privacy: "#", terms: "#" };
+  const ORG_NAME = ORG.name || "Aivanta Scholar Foundation";
+  const ORG_SHORT = ORG.shortName || "Aivanta Scholar";
+  const ORG_SUFFIX = ORG.suffixWord || "Foundation";
+  const ORG_MICRO = ORG.microTagline || "Awareness · Skills · Values";
+  const ORG_TAGLINE = ORG.tagline || "Empowering today's students to build tomorrow's India";
 
   // ---- Navigation model (single source of truth) ----
   const NAV = [
@@ -103,7 +117,7 @@
     <div class="bg-[var(--asf-navy)] text-white text-xs">
       <div class="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between">
         <p class="hidden sm:block font-medium tracking-wide">
-          Empowering today's students to build tomorrow's India 
+          ${ORG_TAGLINE}
         </p>
         <div class="flex items-center gap-4 ml-auto">
           <a href="mailto:${CONTACT.email}" class="hover:text-[var(--asf-gold-light)] inline-flex items-center gap-1">
@@ -114,12 +128,12 @@
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3l2 5-2.5 1.5a11 11 0 005 5L17 12l5 2v3a2 2 0 01-2 2A16 16 0 013 5z"/></svg>
             ${CONTACT.phone}
           </a>
-          <div class="hidden md:flex items-center gap-1 border-l border-white/20 pl-3" aria-label="Language">
-            <button class="font-semibold hover:text-[var(--asf-gold-light)]">EN</button>
-            <span class="text-white/40">|</span>
-            <button class="hover:text-[var(--asf-gold-light)]">हिं</button>
-            <span class="text-white/40">|</span>
-            <button class="hover:text-[var(--asf-gold-light)]">मरा</button>
+          <div class="hidden md:flex items-center gap-1 border-l border-white/20 pl-3" role="group" aria-label="Choose language">
+            ${LANGS.map(
+              (l, idx) =>
+                `${idx > 0 ? '<span class="text-white/40" aria-hidden="true">|</span>' : ''}` +
+                `<button type="button" data-lang="${l.code}" class="asf-lang px-1 hover:text-[var(--asf-gold-light)]" aria-pressed="${l.active ? 'true' : 'false'}">${l.label}</button>`
+            ).join("")}
           </div>
         </div>
       </div>
@@ -129,11 +143,11 @@
     <div class="bg-white/95 backdrop-blur sticky top-0 z-40 shadow-sm">
       <div class="max-w-7xl mx-auto px-4">
         <div class="h-20 flex items-center justify-between gap-4">
-          <a href="index.html" class="flex items-center gap-3 shrink-0" aria-label="Aivanta Scholar Foundation home">
+          <a href="index.html" class="flex items-center gap-3 shrink-0" aria-label="${ORG_NAME} home">
             ${logoMark(48)}
             <span class="leading-tight">
-              <span class="block font-display font-extrabold text-lg text-[var(--asf-navy)]">Aivanta Scholar</span>
-              <span class="block text-[11px] font-semibold tracking-[0.18em] text-[var(--asf-gold)] uppercase">Foundation</span>
+              <span class="block font-display font-extrabold text-lg text-[var(--asf-navy)]">${ORG_SHORT}</span>
+              <span class="block text-[11px] font-semibold tracking-[0.18em] text-[var(--asf-gold)] uppercase">${ORG_SUFFIX}</span>
             </span>
           </a>
 
@@ -187,8 +201,8 @@
           <div class="flex items-center gap-3 mb-4">
             ${logoMark(44)}
             <span class="leading-tight">
-              <span class="block font-display font-extrabold text-lg">Aivanta Scholar Foundation</span>
-              <span class="block text-[11px] font-semibold tracking-[0.18em] text-[var(--asf-gold-light)] uppercase">Awareness · Skills · Values</span>
+              <span class="block font-display font-extrabold text-lg">${ORG_NAME}</span>
+              <span class="block text-[11px] font-semibold tracking-[0.18em] text-[var(--asf-gold-light)] uppercase">${ORG_MICRO}</span>
             </span>
           </div>
           <p class="text-slate-300 text-sm leading-relaxed max-w-sm">
@@ -198,9 +212,10 @@
           </p>
           <div class="flex items-center gap-3 mt-5">
             ${["facebook", "instagram", "linkedin", "youtube"]
+              .filter((s) => SOCIAL[s])
               .map(
                 (s) =>
-                  `<a href="#" aria-label="${s}" class="w-9 h-9 grid place-items-center rounded-full bg-white/10 hover:bg-[var(--asf-gold)] hover:text-[var(--asf-navy-900)] transition-colors">
+                  `<a href="${SOCIAL[s]}" target="_blank" rel="noopener noreferrer" aria-label="${s} (opens in a new tab)" class="w-9 h-9 grid place-items-center rounded-full bg-white/10 hover:bg-[var(--asf-gold)] hover:text-[var(--asf-navy-900)] transition-colors">
                      <span class="text-xs font-bold uppercase">${s[0]}</span>
                    </a>`
               )
@@ -231,10 +246,10 @@
       </div>
       <div class="border-t border-white/10">
         <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-          <p>© ${new Date().getFullYear()} Aivanta Scholar Foundation. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} ${ORG_NAME}. All rights reserved.</p>
           <p class="flex items-center gap-4">
-            <a href="#" class="hover:text-[var(--asf-gold-light)]">Privacy Policy</a>
-            <a href="#" class="hover:text-[var(--asf-gold-light)]">Terms of Use</a>
+            <a href="${LEGAL.privacy}" class="hover:text-[var(--asf-gold-light)]">Privacy Policy</a>
+            <a href="${LEGAL.terms}" class="hover:text-[var(--asf-gold-light)]">Terms of Use</a>
             <a href="contact.html" class="hover:text-[var(--asf-gold-light)]">Contact</a>
           </p>
         </div>
@@ -332,6 +347,46 @@
     nums.forEach((n) => io.observe(n));
   }
 
+  function wireLanguage() {
+    const btns = Array.from(document.querySelectorAll(".asf-lang"));
+    if (!btns.length) return;
+    const saved = (function () {
+      try { return localStorage.getItem("asf-lang"); } catch (e) { return null; }
+    })();
+    const paint = (code) => {
+      document.documentElement.setAttribute("lang", code);
+      btns.forEach((b) => {
+        const on = b.getAttribute("data-lang") === code;
+        b.setAttribute("aria-pressed", String(on));
+        b.classList.toggle("text-[var(--asf-gold-light)]", on);
+        b.classList.toggle("font-bold", on);
+      });
+    };
+    const initial =
+      saved ||
+      (LANGS.find((l) => l.active) || LANGS[0]).code;
+    paint(initial);
+    btns.forEach((b) =>
+      b.addEventListener("click", () => {
+        const code = b.getAttribute("data-lang");
+        try { localStorage.setItem("asf-lang", code); } catch (e) {}
+        paint(code);
+      })
+    );
+  }
+
+  function renderTicker() {
+    const track = document.getElementById("asf-ticker");
+    if (!track) return;
+    const items = CFG.announcements || [];
+    if (!items.length) return;
+    // Duplicate the list so the marquee loops seamlessly.
+    const one = items
+      .map((t) => `<span class="px-8">${t}</span>`)
+      .join("");
+    track.innerHTML = one + one;
+  }
+
   /* ---------- Boot ---------- */
   document.addEventListener("DOMContentLoaded", () => {
     const h = document.getElementById("asf-header");
@@ -339,6 +394,8 @@
     if (h) h.innerHTML = buildHeader();
     if (f) f.innerHTML = buildFooter();
     wireMobileNav();
+    wireLanguage();
+    renderTicker();
     wireCarousel();
     wireReveal();
     wireCounters();

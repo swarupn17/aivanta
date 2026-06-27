@@ -30,6 +30,24 @@ cleaner, modern look and the ASF brand palette.
 - Navy `#0C2D6B` - Gold `#C8960C` - Sky `#1A73C8`
 - Fonts: Poppins (display) + Inter (body)
 
+## Edit your info in ONE place
+
+All the stuff you'll want to change regularly lives in **`assets/js/config.js`** -
+no need to touch any HTML. Edit that file and refresh:
+
+| What | Where in config |
+|------|-----------------|
+| Org name / tagline / academic year | `org` |
+| Email, phone, website, address | `contact` |
+| Social media URLs (empty `""` hides the icon) | `social` |
+| Language buttons in the top bar | `languages` |
+| Fee amounts | `fees` |
+| Scrolling notices on the homepage | `announcements` |
+| Privacy / Terms link targets | `legal` |
+
+The shared header, footer, social icons, language toggle and homepage ticker all
+read from this file automatically.
+
 ## Run locally
 ```bash
 python3 -m http.server 5173
