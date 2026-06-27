@@ -82,8 +82,13 @@ select:focus-visible,
   transition: opacity 0.8s ease-in-out;
   position: absolute;
   inset: 0;
+  pointer-events: none;   /* invisible slides must not steal clicks */
 }
-.carousel-slide.is-active { opacity: 1; position: relative; }
+.carousel-slide.is-active {
+  opacity: 1;
+  position: relative;
+  pointer-events: auto;
+}
 
 .carousel-dot {
   width: 12px; height: 12px;
