@@ -32,7 +32,7 @@
         <!-- Slide 1 -->
         <div class="carousel-slide is-active">
           <div class="bg-gradient-to-br from-navy via-navy-700 to-sky/40">
-            <div class="max-w-7xl mx-auto px-4 py-20 md:py-28 grid lg:grid-cols-2 gap-10 items-center">
+            <div class="w-full max-w-7xl mx-auto px-4 py-12 md:py-16 grid lg:grid-cols-2 gap-10 items-center">
               <div>
                 <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/20 text-amber-200 text-xs font-semibold px-3 py-1.5 rounded-full">
                   National Student Awareness Initiative
@@ -72,7 +72,7 @@
         <!-- Slide 2 -->
         <div class="carousel-slide">
           <div class="bg-gradient-to-br from-navy-900 via-navy to-sky/30">
-            <div class="max-w-7xl mx-auto px-4 py-20 md:py-28">
+            <div class="w-full max-w-7xl mx-auto px-4 py-12 md:py-16">
               <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/20 text-amber-200 text-xs font-semibold px-3 py-1.5 rounded-full">Pillar Two — Social Welfare</span>
               <h2 class="font-display font-extrabold text-4xl md:text-5xl leading-tight mt-5 max-w-3xl">
                 We earn to <span class="text-gold-light">give back</span>
@@ -89,7 +89,7 @@
         <!-- Slide 3 -->
         <div class="carousel-slide">
           <div class="bg-gradient-to-br from-navy via-sky/40 to-navy-900">
-            <div class="max-w-7xl mx-auto px-4 py-20 md:py-28">
+            <div class="w-full max-w-7xl mx-auto px-4 py-12 md:py-16">
               <span class="inline-flex items-center gap-2 bg-white/10 ring-1 ring-white/20 text-amber-200 text-xs font-semibold px-3 py-1.5 rounded-full">Trilingual · Inclusive</span>
               <h2 class="font-display font-extrabold text-4xl md:text-5xl leading-tight mt-5 max-w-3xl">
                 One paper. <span class="text-gold-light">Three languages.</span> Every child.
@@ -109,6 +109,16 @@
           <button class="carousel-dot" aria-label="Go to slide 2"></button>
           <button class="carousel-dot" aria-label="Go to slide 3"></button>
         </div>
+
+        <!-- Prev / Next arrows -->
+        <button data-carousel-prev type="button" aria-label="Previous slide"
+                class="carousel-arrow absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 grid place-items-center rounded-full bg-white/15 hover:bg-white/30 ring-1 ring-white/30 backdrop-blur text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button data-carousel-next type="button" aria-label="Next slide"
+                class="carousel-arrow absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 grid place-items-center rounded-full bg-white/15 hover:bg-white/30 ring-1 ring-white/30 backdrop-blur text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+        </button>
       </div>
     </section>
 

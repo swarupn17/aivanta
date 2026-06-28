@@ -273,7 +273,10 @@
     if (!root) return;
     const slides = Array.from(root.querySelectorAll(".carousel-slide"));
     const dots = Array.from(root.querySelectorAll(".carousel-dot"));
+    const prev = root.querySelector("[data-carousel-prev]");
+    const next = root.querySelector("[data-carousel-next]");
     if (slides.length < 2) return;
+    const DELAY = 9000; // ~9s per slide so there is time to read
     let i = 0;
     let timer;
     const go = (n) => {
@@ -283,17 +286,18 @@
       slides[i].classList.add("is-active");
       dots[i] && dots[i].classList.add("is-active");
     };
-    const start = () => (timer = setInterval(() => go(i + 1), 6000));
+    const start = () => (timer = setInterval(() => go(i + 1), DELAY));
     const stop = () => clearInterval(timer);
-    dots.forEach((d, n) =>
-      d.addEventListener("click", () => {
-        stop();
-        go(n);
-        start();
-      })
-    );
+    const restart = () => { stop(); start(); };
+    const jump = (n) => { go(n); restart(); };
+    dots.forEach((d, n) => d.addEventListener("click", () => jump(n)));
+    if (prev) prev.addEventListener("click", () => jump(i - 1));
+    if (next) next.addEventListener("click", () => jump(i + 1));
+    // Pause while the visitor is reading / hovering / keyboard-focused.
     root.addEventListener("mouseenter", stop);
     root.addEventListener("mouseleave", start);
+    root.addEventListener("focusin", stop);
+    root.addEventListener("focusout", start);
     start();
   }
 
