@@ -28,6 +28,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Strip internal / source files from deploy
+        run: rm -rf reference *.pdf context.md "ASF MD File.md" || true
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 

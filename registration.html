@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="assets/img/favicon.png" />
   <title>School Registration - Aivanta Scholar Foundation</title>
-  <meta name="description" content="Register your school for the Aivanta Scholar Foundation annual assessments. Estimate fees and start enrolment. Government, private, urban and rural schools welcome." />
+  <meta name="description" content="Register your school for the Aivanta Scholar Foundation annual assessments. Government, private, urban and rural schools welcome — voluntary participation, study material included." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -32,11 +33,10 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-4 py-16">
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="grid sm:grid-cols-3 gap-5">
         <div class="reveal bg-asf-paper rounded-2xl p-6 ring-1 ring-slate-200" style="background:var(--asf-paper)"><span class="font-display font-extrabold text-3xl text-gold">1</span><h3 class="font-display font-bold text-navy mt-2">Submit details</h3><p class="text-sm text-slate-600 mt-1">Fill the school registration form below.</p></div>
-        <div class="reveal bg-asf-paper rounded-2xl p-6 ring-1 ring-slate-200" style="background:var(--asf-paper)"><span class="font-display font-extrabold text-3xl text-gold">2</span><h3 class="font-display font-bold text-navy mt-2">Confirm &amp; pay</h3><p class="text-sm text-slate-600 mt-1">Get confirmation and pay the subject-wise fee.</p></div>
-        <div class="reveal bg-asf-paper rounded-2xl p-6 ring-1 ring-slate-200" style="background:var(--asf-paper)"><span class="font-display font-extrabold text-3xl text-gold">3</span><h3 class="font-display font-bold text-navy mt-2">Enrol students</h3><p class="text-sm text-slate-600 mt-1">Upload your student list; roll numbers are assigned.</p></div>
-        <div class="reveal bg-asf-paper rounded-2xl p-6 ring-1 ring-slate-200" style="background:var(--asf-paper)"><span class="font-display font-extrabold text-3xl text-gold">4</span><h3 class="font-display font-bold text-navy mt-2">Assess &amp; reward</h3><p class="text-sm text-slate-600 mt-1">Conduct the exam; get results &amp; certificates.</p></div>
+        <div class="reveal bg-asf-paper rounded-2xl p-6 ring-1 ring-slate-200" style="background:var(--asf-paper)"><span class="font-display font-extrabold text-3xl text-gold">2</span><h3 class="font-display font-bold text-navy mt-2">Enrol students</h3><p class="text-sm text-slate-600 mt-1">Upload your student list; roll numbers are assigned.</p></div>
+        <div class="reveal bg-asf-paper rounded-2xl p-6 ring-1 ring-slate-200" style="background:var(--asf-paper)"><span class="font-display font-extrabold text-3xl text-gold">3</span><h3 class="font-display font-bold text-navy mt-2">Assess &amp; reward</h3><p class="text-sm text-slate-600 mt-1">Conduct the exam; get results &amp; certificates.</p></div>
       </div>
     </section>
 
@@ -80,7 +80,7 @@
             <legend class="font-display font-bold text-navy">Subjects &amp; estimated students</legend>
             <p class="text-sm text-slate-500">How many students will appear for each subject? Rs.150 per student per subject.</p>
             <div class="grid sm:grid-cols-3 gap-4">
-              <label class="block rounded-xl ring-1 ring-slate-200 p-4"><span class="text-sm font-bold text-sky">Financial (FAA)</span>
+              <label class="block rounded-xl ring-1 ring-slate-200 p-4"><span class="text-sm font-bold text-sky">Financial (FIA)</span>
                 <input type="number" min="0" value="0" class="reg-count mt-2 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 focus:ring-2 focus:ring-sky" /></label>
               <label class="block rounded-xl ring-1 ring-slate-200 p-4"><span class="text-sm font-bold text-navy">Cyber (CIA)</span>
                 <input type="number" min="0" value="0" class="reg-count mt-2 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 focus:ring-2 focus:ring-sky" /></label>
@@ -96,18 +96,13 @@
         </form>
 
         <aside class="lg:sticky lg:top-28 self-start">
-          <div class="bg-navy text-white rounded-2xl p-7">
-            <h2 class="font-display font-bold text-xl">Fee estimate</h2>
-            <dl class="mt-5 space-y-3 text-sm">
-              <div class="flex justify-between"><dt class="text-slate-300">Total subject enrolments</dt><dd id="est-count" class="font-bold">0</dd></div>
-              <div class="flex justify-between"><dt class="text-slate-300">Rate per student/subject</dt><dd class="font-bold">Rs.150</dd></div>
-              <div class="border-t border-white/10 pt-3 flex justify-between text-lg"><dt class="font-display font-bold">Estimated total</dt><dd id="est-total" class="font-display font-extrabold text-gold-light">Rs.0</dd></div>
-            </dl>
-            <p class="text-xs text-slate-400 mt-4">Includes participation, free study material, evaluation and a printed certificate per subject. Rs.25 of each fee supports the Social Welfare Fund.</p>
-          </div>
-          <div class="bg-white rounded-2xl ring-1 ring-slate-200 p-6 mt-4">
+          <div class="bg-white rounded-2xl ring-1 ring-slate-200 p-6">
             <h3 class="font-display font-bold text-navy text-sm">Need help?</h3>
             <p class="text-sm text-slate-600 mt-2">Email <a class="text-sky font-semibold" href="mailto:info@aivantascholar.org">info@aivantascholar.org</a> or call our coordinator team.</p>
+          </div>
+          <div class="bg-navy text-white rounded-2xl p-7 mt-4">
+            <h3 class="font-display font-bold text-sm uppercase tracking-wider text-gold-light">What's included</h3>
+            <p class="text-sm text-slate-200 mt-3">Every subject (Rs.150) includes participation, free PDF study material, centralised evaluation and a printed certificate — with no hidden charges.</p>
           </div>
         </aside>
       </div>
@@ -119,20 +114,8 @@
   <script src="assets/js/main.js"></script>
   <script>
     (function () {
-      var counts = document.querySelectorAll(".reg-count");
-      var elCount = document.getElementById("est-count");
-      var elTotal = document.getElementById("est-total");
       var form = document.getElementById("reg-form");
       var msg = document.getElementById("reg-msg");
-      var RATE = 150;
-      function recompute() {
-        var n = 0;
-        counts.forEach(function (c) { n += Math.max(0, parseInt(c.value, 10) || 0); });
-        elCount.textContent = n.toLocaleString("en-IN");
-        elTotal.textContent = "Rs." + (n * RATE).toLocaleString("en-IN");
-      }
-      counts.forEach(function (c) { c.addEventListener("input", recompute); });
-      recompute();
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -140,7 +123,6 @@
         msg.classList.remove("hidden");
         msg.scrollIntoView({ behavior: "smooth", block: "center" });
         form.reset();
-        recompute();
       });
     })();
   </script>

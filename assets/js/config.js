@@ -49,10 +49,7 @@ window.ASF_CONFIG = {
 
   /* ---- Fee model (Rupees, per student per subject) ---- */
   fees: {
-    perSubject: 150,
-    welfarePerStudent: 25,
-    schoolPerStudent: 25,
-    coordinatorPerStudent: 25
+    perSubject: 150
   },
 
   /* ---- Scrolling announcement ticker (homepage) ----

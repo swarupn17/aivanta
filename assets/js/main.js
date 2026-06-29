@@ -32,10 +32,11 @@
   const NAV = [
     { key: "home", label: "Home", href: "index.html" },
     { key: "about", label: "About Us", href: "about.html" },
+    { key: "viksit", label: "Viksit Bharat", href: "viksit-bharat.html" },
     {
       key: "assessments", label: "Assessments", href: "assessments.html",
       children: [
-        { label: "Financial Awareness (FAA)", href: "assessments.html#faa" },
+        { label: "Financial Intelligence (FIA)", href: "assessments.html#faa" },
         { label: "Cyber Intelligence (CIA)", href: "assessments.html#cia" },
         { label: "Artificial Intelligence (AIA)", href: "assessments.html#aia" },
         { label: "Class-wise Syllabus", href: "syllabus.html" }
@@ -49,17 +50,6 @@
 
   const activePage = document.body.getAttribute("data-page") || "home";
 
-  /* ---------- Logo (placeholder, swap real asset later) ---------- */
-  function logoMark(size) {
-    return `
-      <span class="inline-flex items-center justify-center rounded-xl shrink-0"
-            style="width:${size}px;height:${size}px;
-                   background:linear-gradient(135deg,var(--asf-navy),var(--asf-sky));
-                   box-shadow:0 6px 16px -6px rgba(12,45,107,.6)">
-        <span class="font-display font-extrabold text-white"
-              style="font-size:${size * 0.42}px;line-height:1">A</span>
-      </span>`;
-  }
 
   /* ---------- Header ---------- */
   function buildHeader() {
@@ -143,12 +133,8 @@
     <div class="bg-white/95 backdrop-blur sticky top-0 z-40 shadow-sm">
       <div class="max-w-7xl mx-auto px-4">
         <div class="h-20 flex items-center justify-between gap-4">
-          <a href="index.html" class="flex items-center gap-3 shrink-0" aria-label="${ORG_NAME} home">
-            ${logoMark(48)}
-            <span class="leading-tight">
-              <span class="block font-display font-extrabold text-lg text-[var(--asf-navy)]">${ORG_SHORT}</span>
-              <span class="block text-[11px] font-semibold tracking-[0.18em] text-[var(--asf-gold)] uppercase">${ORG_SUFFIX}</span>
-            </span>
+          <a href="index.html" class="flex items-center shrink-0" aria-label="${ORG_NAME} home">
+            <img src="assets/img/logo-aivanta.png" alt="${ORG_NAME}" class="h-12 w-auto" />
           </a>
 
           <nav aria-label="Primary" class="hidden lg:block">
@@ -198,11 +184,9 @@
       <div class="tricolour-strip" aria-hidden="true"></div>
       <div class="max-w-7xl mx-auto px-4 py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-5">
         <div class="lg:col-span-2">
-          <div class="flex items-center gap-3 mb-4">
-            ${logoMark(44)}
-            <span class="leading-tight">
-              <span class="block font-display font-extrabold text-lg">${ORG_NAME}</span>
-              <span class="block text-[11px] font-semibold tracking-[0.18em] text-[var(--asf-gold-light)] uppercase">${ORG_MICRO}</span>
+          <div class="mb-4">
+            <span class="inline-flex bg-white rounded-xl px-3 py-2.5 shadow-sm">
+              <img src="assets/img/logo-aivanta.png" alt="${ORG_NAME}" class="h-10 w-auto" />
             </span>
           </div>
           <p class="text-slate-300 text-sm leading-relaxed max-w-sm">
@@ -223,13 +207,14 @@
           </div>
         </div>
         ${col("Assessments", [
-          { label: "Financial Awareness", href: "assessments.html#faa" },
+          { label: "Financial Intelligence", href: "assessments.html#faa" },
           { label: "Cyber Intelligence", href: "assessments.html#cia" },
           { label: "Artificial Intelligence", href: "assessments.html#aia" },
           { label: "Class-wise Syllabus", href: "syllabus.html" }
         ])}
         ${col("Foundation", [
           { label: "About Us", href: "about.html" },
+          { label: "Viksit Bharat 2047", href: "viksit-bharat.html" },
           { label: "Social Welfare", href: "social-welfare.html" },
           { label: "Publications", href: "publications.html" },
           { label: "Register a School", href: "registration.html" }

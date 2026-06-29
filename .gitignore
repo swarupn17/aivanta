@@ -15,3 +15,7 @@ __pycache__/
 *student*.csv
 *students*.xlsx
 *pii*
+
+# Source / reference material — internal only, NOT for the public repo or live site
+# (brand source PNGs, brochure PDF, business-strategy notes, raw syllabus dump)
+reference/

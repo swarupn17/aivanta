@@ -168,7 +168,7 @@
   };
 
   const META = {
-    FAA: { name: "Financial Awareness", color: "#1A73C8" },
+    FAA: { name: "Financial Intelligence", color: "#1A73C8" },
     CIA: { name: "Cyber Intelligence", color: "#0C2D6B" },
     AIA: { name: "Artificial Intelligence", color: "#C8960C" }
   };
