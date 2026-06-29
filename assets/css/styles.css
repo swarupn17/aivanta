@@ -77,14 +77,16 @@ select:focus-visible,
 }
 
 /* ---- Hero carousel ---- */
+/* Stacked-grid: all slides share one grid cell, so the banner is always
+   exactly as tall as the TALLEST slide and never changes size on rotate. */
+.carousel-track { display: grid; }
 .carousel-slide {
+  grid-area: 1 / 1;        /* every slide occupies the same cell */
   opacity: 0;
   transition: opacity 0.8s ease-in-out;
-  position: absolute;
-  inset: 0;
   pointer-events: none;   /* invisible slides must not steal clicks */
   display: flex;
-  min-height: 460px;       /* uniform height so the banner never jumps */
+  min-height: 460px;       /* floor so short slides still fill the banner */
 }
 .carousel-slide > div {   /* gradient wrapper fills + vertically centres content */
   width: 100%;
@@ -96,8 +98,8 @@ select:focus-visible,
 }
 .carousel-slide.is-active {
   opacity: 1;
-  position: relative;
   pointer-events: auto;
+  z-index: 1;
 }
 
 .carousel-dot {

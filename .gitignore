@@ -16,6 +16,6 @@ __pycache__/
 *students*.xlsx
 *pii*
 
-# Source / reference material — internal only, NOT for the public repo or live site
-# (brand source PNGs, brochure PDF, business-strategy notes, raw syllabus dump)
-reference/
+# Source / reference & internal docs - NOT for the public repo or live site
+# (brand source PNGs, brochure PDF, business-strategy notes, PRDs, raw syllabus dump)
+docs/

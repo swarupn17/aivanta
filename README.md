@@ -22,10 +22,10 @@ cleaner, modern look and the ASF brand palette.
   assets/js/            # config.js, main.js, syllabus.js, contact.js
   assets/img/           # logos + favicon (cropped, web-ready)
   .github/workflows/    # GitHub Pages deploy
-reference/              # INTERNAL ONLY - gitignored, never deployed
-                        # brand source PNGs, brochure PDF, strategy notes
+docs/                   # INTERNAL ONLY - gitignored, never deployed
+                        # brand source PNGs, brochure PDF, PRDs, strategy notes
 ```
-> `reference/` is excluded from git **and** stripped from the live deploy - it
+> `docs/` is excluded from git **and** stripped from the live deploy - it
 > holds source art and internal business notes that must not be public.
 
 ## Pages
