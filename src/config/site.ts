@@ -19,10 +19,10 @@ export const siteConfig = {
 
   contact: {
     email: "info@aivantascholar.org",
-    phone: "+91 99999 00000",
+    phone: "+91 7588665576",
     site: "www.aivantascholar.org",
-    place: "Pimpri-Chinchwad, Pune, Maharashtra",
-    address: "Pimpri-Chinchwad, Pune, Maharashtra, India",
+    place: "205, Shri Padmalaxmi, Behind Vasudha Etasha, Jijai Nagar, Kothrud, Pune, Maharashtra 411038",
+    address: "205, Shri Padmalaxmi, Behind Vasudha Etasha, Jijai Nagar, Kothrud, Pune, Maharashtra 411038",
   },
 
   /** Leave a value as "" to hide that social icon. */

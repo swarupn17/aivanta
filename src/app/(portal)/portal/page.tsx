@@ -16,8 +16,8 @@ type Role = NonNullable<Profile["role"]>;
 
 const ACTIONS: Record<Role, { title: string; body: string; href: string; Icon: typeof IconUsers }[]> = {
   school: [
-    { title: "Enrol students", body: "Add or bulk-upload students for this cycle.", href: "/portal", Icon: IconUsers },
-    { title: "Registrations", body: "Review your subject registrations & fees.", href: "/portal", Icon: IconClipboard },
+    { title: "Enrol students", body: "Import a CSV or add students, then see the fee total.", href: "/portal/students", Icon: IconUsers },
+    { title: "Registrations", body: "Review your subject registrations & fees.", href: "/portal/students", Icon: IconClipboard },
     { title: "Hall tickets", body: "Download admit cards once payment clears.", href: "/portal", Icon: IconCertificate },
   ],
   coordinator: [
@@ -26,12 +26,12 @@ const ACTIONS: Record<Role, { title: string; body: string; href: string; Icon: t
   ],
   admin: [
     { title: "Review requests", body: "Approve schools & generate their codes.", href: "/portal/leads", Icon: IconShieldCheck },
-    { title: "Exams & content", body: "Manage the exam catalog and pages.", href: "/portal", Icon: IconBookOpen },
+    { title: "Schools", body: "Browse Year>State>District>City and manage students.", href: "/portal/admin/schools", Icon: IconUsers },
     { title: "Results", body: "Upload OMR data and publish results.", href: "/portal", Icon: IconGrowthChart },
   ],
   super_admin: [
     { title: "Review requests", body: "Approve schools & generate their codes.", href: "/portal/leads", Icon: IconShieldCheck },
-    { title: "Exams & content", body: "Manage the exam catalog and pages.", href: "/portal", Icon: IconBookOpen },
+    { title: "Schools", body: "Browse Year>State>District>City and manage students.", href: "/portal/admin/schools", Icon: IconUsers },
     { title: "Results", body: "Upload OMR data and publish results.", href: "/portal", Icon: IconGrowthChart },
   ],
   student: [

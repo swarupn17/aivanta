@@ -5,12 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   registrationSchema,
-  BOARDS,
-  SCHOOL_TYPES,
+  APPLICANT_ROLES,
   type RegistrationInput,
 } from "@/features/registration/schema";
 import { submitRegistration } from "@/features/registration/actions";
-import { siteConfig } from "@/config/site";
 import {
   fieldClasses,
   Label,
@@ -19,35 +17,22 @@ import {
   FormAlert,
 } from "@/components/ui/form";
 
-const SUBJECTS = [
-  { name: "fiaCount" as const, label: "Financial (FIA)", tone: "text-dusty-600" },
-  { name: "ciaCount" as const, label: "Cyber (CIA)", tone: "text-navy" },
-  { name: "aiaCount" as const, label: "AI (AIA)", tone: "text-dusty-600" },
-];
-
 /**
- * School registration form (Client Component) with a LIVE fee total.
- * The displayed total is convenience only — the Server Action recomputes the
- * authoritative amount before any payment.
+ * School code-request form (SOF-style). Captures the applicant + school details.
+ * Subjects, student counts and fees are handled later in the school portal.
  */
 export function RegistrationForm() {
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
-  const fee = siteConfig.fees.perSubject;
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegistrationInput>({
     resolver: zodResolver(registrationSchema),
-    defaultValues: { fiaCount: 0, ciaCount: 0, aiaCount: 0 },
+    defaultValues: { applicantRole: "Principal", country: "India" },
   });
-
-  const counts = watch(["fiaCount", "ciaCount", "aiaCount"]);
-  const totalStudents = counts.reduce((sum, n) => sum + (Number(n) || 0), 0);
-  const totalRupees = totalStudents * fee;
 
   const onSubmit = async (data: RegistrationInput) => {
     const res = await submitRegistration(data);
@@ -67,100 +52,138 @@ export function RegistrationForm() {
     >
       <div>
         <h2 className="font-display text-2xl font-extrabold text-navy">
-          School registration form
+          Request a school code
         </h2>
-        <p className="mt-1 text-sm text-slate-500">Fields marked * are required.</p>
+        <p className="mt-1 text-sm text-slate-500">
+          Schools interested in having their students appear in Aivanta
+          assessments can submit the details below. Our representative will
+          contact you and assist with registration. Fields marked * are required.
+        </p>
       </div>
+
+      <fieldset className="space-y-4">
+        <legend className="font-display font-bold text-navy">Your details</legend>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Label>
+            <LabelText>Are you *</LabelText>
+            <select className={fieldClasses} {...register("applicantRole")}>
+              {APPLICANT_ROLES.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </select>
+          </Label>
+          <Label>
+            <LabelText>Your name *</LabelText>
+            <input type="text" className={fieldClasses} {...register("applicantName")} />
+            <FieldError message={errors.applicantName?.message} />
+          </Label>
+          <Label>
+            <LabelText>Your email id *</LabelText>
+            <input
+              type="email"
+              placeholder="Enter your valid e-mail id"
+              className={fieldClasses}
+              {...register("applicantEmail")}
+            />
+            <FieldError message={errors.applicantEmail?.message} />
+          </Label>
+          <Label>
+            <LabelText>Your mobile no *</LabelText>
+            <input
+              type="tel"
+              placeholder="Please enter 10 digit mobile no."
+              className={fieldClasses}
+              {...register("applicantMobile")}
+            />
+            <FieldError message={errors.applicantMobile?.message} />
+          </Label>
+        </div>
+      </fieldset>
 
       <fieldset className="space-y-4">
         <legend className="font-display font-bold text-navy">School details</legend>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Label>
+          <Label className="sm:col-span-2">
             <LabelText>School name *</LabelText>
-            <input type="text" className={fieldClasses} {...register("school")} />
-            <FieldError message={errors.school?.message} />
-          </Label>
-          <Label>
-            <LabelText>UDISE code</LabelText>
-            <input type="text" className={fieldClasses} {...register("udise")} />
-          </Label>
-          <Label>
-            <LabelText>Board</LabelText>
-            <select className={fieldClasses} {...register("board")}>
-              {BOARDS.map((b) => (
-                <option key={b}>{b}</option>
-              ))}
-            </select>
-          </Label>
-          <Label>
-            <LabelText>School type</LabelText>
-            <select className={fieldClasses} {...register("type")}>
-              {SCHOOL_TYPES.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
+            <input
+              type="text"
+              placeholder="Enter complete school name"
+              className={fieldClasses}
+              {...register("schoolName")}
+            />
+            <FieldError message={errors.schoolName?.message} />
           </Label>
           <Label className="sm:col-span-2">
-            <LabelText>Address (city, district, state)</LabelText>
-            <input type="text" className={fieldClasses} {...register("address")} />
+            <LabelText>School address *</LabelText>
+            <input
+              type="text"
+              placeholder="Enter complete school address"
+              className={fieldClasses}
+              {...register("schoolAddress")}
+            />
+            <FieldError message={errors.schoolAddress?.message} />
+          </Label>
+          <Label>
+            <LabelText>School city *</LabelText>
+            <input type="text" className={fieldClasses} {...register("city")} />
+            <FieldError message={errors.city?.message} />
+          </Label>
+          <Label>
+            <LabelText>School district *</LabelText>
+            <input type="text" className={fieldClasses} {...register("district")} />
+            <FieldError message={errors.district?.message} />
+          </Label>
+          <Label>
+            <LabelText>School state *</LabelText>
+            <input type="text" className={fieldClasses} {...register("state")} />
+            <FieldError message={errors.state?.message} />
+          </Label>
+          <Label>
+            <LabelText>School country *</LabelText>
+            <input type="text" className={fieldClasses} {...register("country")} />
+            <FieldError message={errors.country?.message} />
+          </Label>
+          <Label>
+            <LabelText>School pincode *</LabelText>
+            <input type="text" className={fieldClasses} {...register("pincode")} />
+            <FieldError message={errors.pincode?.message} />
+          </Label>
+          <Label>
+            <LabelText>School email id *</LabelText>
+            <input
+              type="email"
+              placeholder="Enter valid school email id"
+              className={fieldClasses}
+              {...register("schoolEmail")}
+            />
+            <FieldError message={errors.schoolEmail?.message} />
+          </Label>
+          <Label>
+            <LabelText>School phone no *</LabelText>
+            <input type="tel" className={fieldClasses} {...register("schoolPhone")} />
+            <FieldError message={errors.schoolPhone?.message} />
           </Label>
         </div>
       </fieldset>
 
       <fieldset className="space-y-4">
-        <legend className="font-display font-bold text-navy">
-          Coordinator details
-        </legend>
+        <legend className="font-display font-bold text-navy">Principal details</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <Label>
-            <LabelText>Contact name *</LabelText>
-            <input type="text" className={fieldClasses} {...register("contact")} />
-            <FieldError message={errors.contact?.message} />
+            <LabelText>Principal name *</LabelText>
+            <input type="text" className={fieldClasses} {...register("principalName")} />
+            <FieldError message={errors.principalName?.message} />
           </Label>
           <Label>
-            <LabelText>Phone *</LabelText>
-            <input type="tel" className={fieldClasses} {...register("phone")} />
-            <FieldError message={errors.phone?.message} />
+            <LabelText>Principal contact no *</LabelText>
+            <input
+              type="tel"
+              placeholder="Please enter valid contact no."
+              className={fieldClasses}
+              {...register("principalContact")}
+            />
+            <FieldError message={errors.principalContact?.message} />
           </Label>
-          <Label className="sm:col-span-2">
-            <LabelText>Email *</LabelText>
-            <input type="email" className={fieldClasses} {...register("email")} />
-            <FieldError message={errors.email?.message} />
-          </Label>
-        </div>
-      </fieldset>
-
-      <fieldset className="space-y-4">
-        <legend className="font-display font-bold text-navy">
-          Subjects &amp; estimated students
-        </legend>
-        <p className="text-sm text-slate-500">
-          How many students will appear for each subject? ₹{fee} per student per
-          subject.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {SUBJECTS.map((s) => (
-            <label key={s.name} className="block rounded-xl p-4 ring-1 ring-slate-200">
-              <span className={`text-sm font-bold ${s.tone}`}>{s.label}</span>
-              <input
-                type="number"
-                min={0}
-                className={`${fieldClasses} mt-2`}
-                {...register(s.name)}
-              />
-            </label>
-          ))}
-        </div>
-
-        {/* Live fee total */}
-        <div className="flex items-center justify-between rounded-xl bg-paper px-5 py-4 ring-1 ring-slate-200">
-          <div className="text-sm text-slate-600">
-            <span className="font-semibold text-navy">{totalStudents}</span> student
-            registration{totalStudents === 1 ? "" : "s"} × ₹{fee}
-          </div>
-          <div className="font-display text-2xl font-extrabold text-navy">
-            ₹{totalRupees.toLocaleString("en-IN")}
-          </div>
         </div>
       </fieldset>
 
@@ -176,8 +199,8 @@ export function RegistrationForm() {
         {isSubmitting ? "Submitting…" : "Submit request"}
       </button>
       <p className="text-xs text-slate-400">
-        This sends a request for review. Once approved, we&apos;ll email you a
-        school code to claim your account and enrol students.
+        This sends a request for review. Once approved, an Aivanta representative
+        will contact you and issue your school code to claim your account.
       </p>
     </form>
   );

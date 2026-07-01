@@ -10,15 +10,6 @@ export type ActionResult =
   | { ok: true; message: string; code?: string }
   | { ok: false; error: string };
 
-/** Map the free-text board from the request form to the schools enum. */
-function mapBoard(board?: string | null): "cbse" | "icse" | "state" | "other" {
-  const b = (board ?? "").toLowerCase();
-  if (b.includes("cbse")) return "cbse";
-  if (b.includes("icse")) return "icse";
-  if (b.includes("state")) return "state";
-  return "other";
-}
-
 async function generateUniqueCode(
   admin: ReturnType<typeof createAdminClient>
 ): Promise<string> {
@@ -60,13 +51,16 @@ export async function approveLead(leadId: string): Promise<ActionResult> {
   const code = await generateUniqueCode(admin);
 
   const { error: insErr } = await admin.from("schools").insert({
-    name: lead.school,
-    board: mapBoard(lead.board),
-    affiliation_no: lead.udise ?? null,
-    contact_person: lead.contact_person,
-    contact_phone: lead.phone,
-    contact_email: lead.email,
-    address_line: lead.address ?? null,
+    name: lead.school_name,
+    contact_person: lead.principal_name || lead.applicant_name,
+    contact_phone: lead.school_phone || lead.applicant_mobile,
+    contact_email: lead.school_email || lead.applicant_email,
+    address_line: lead.school_address ?? null,
+    city: lead.city ?? null,
+    district: lead.district ?? null,
+    state: lead.state ?? null,
+    country: lead.country ?? null,
+    pincode: lead.pincode ?? null,
     school_code: code,
     status: "approved",
   });

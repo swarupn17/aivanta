@@ -10,9 +10,6 @@ export function LeadRow({ lead }: { lead: LeadRowData }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const total = (lead.total_paise / 100).toLocaleString("en-IN");
-  const students = lead.fia_count + lead.cia_count + lead.aia_count;
-
   async function onApprove() {
     setBusy(true);
     setErr(null);
@@ -44,27 +41,40 @@ export function LeadRow({ lead }: { lead: LeadRowData }) {
     <div className="rounded-xl bg-white p-5 ring-1 ring-slate-200">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="font-display font-bold text-navy">{lead.school}</h3>
+          <h3 className="font-display font-bold text-navy">{lead.school_name}</h3>
           <p className="text-sm text-slate-600">
-            {lead.contact_person} · {lead.phone} · {lead.email}
+            {[lead.city, lead.district, lead.state, lead.country].filter(Boolean).join(", ")}
+            {lead.pincode ? ` - ${lead.pincode}` : ""}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
-            {lead.board ?? "—"} · {lead.school_type ?? "—"}
-            {lead.address ? ` · ${lead.address}` : ""}
-          </p>
+          {lead.school_address && (
+            <p className="mt-1 text-xs text-slate-500">{lead.school_address}</p>
+          )}
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ring-1 ${badge}`}>
           {status}
         </span>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-600">
-        <span>FIA {lead.fia_count}</span>
-        <span>CIA {lead.cia_count}</span>
-        <span>AIA {lead.aia_count}</span>
-        <span className="font-semibold text-navy">
-          {students} students · ₹{total}
-        </span>
+      <div className="mt-3 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">
+        <p>
+          <span className="font-semibold text-navy">Applicant:</span>{" "}
+          {lead.applicant_name}
+          {lead.applicant_role ? ` (${lead.applicant_role})` : ""}
+        </p>
+        <p>
+          <span className="font-semibold text-navy">Applicant contact:</span>{" "}
+          {lead.applicant_mobile} · {lead.applicant_email}
+        </p>
+        <p>
+          <span className="font-semibold text-navy">Principal:</span>{" "}
+          {lead.principal_name ?? "—"}
+          {lead.principal_contact ? ` · ${lead.principal_contact}` : ""}
+        </p>
+        <p>
+          <span className="font-semibold text-navy">School contact:</span>{" "}
+          {lead.school_phone ?? "—"}
+          {lead.school_email ? ` · ${lead.school_email}` : ""}
+        </p>
       </div>
 
       {code && (
