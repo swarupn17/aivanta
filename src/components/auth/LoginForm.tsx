@@ -1,112 +1,123 @@
 "use client";
 
 import { useState } from "react";
-import { requestOtp, verifyOtp } from "@/features/auth/actions";
+import { signInWithPassword, signUpWithPassword } from "@/features/auth/actions";
 import { fieldClasses, Label, LabelText, FormAlert } from "@/components/ui/form";
 
+type Mode = "signin" | "signup";
+
 /**
- * Two-step email OTP login. Step 1 emails a 6-digit code; step 2 verifies it.
- * On success the Server Action redirects into /portal.
+ * Email + password auth (OTP coming later). Toggles between sign in and create
+ * account. On success the Server Action redirects into /portal.
  */
 export function LoginForm() {
-  const [step, setStep] = useState<"email" | "code">("email");
+  const [mode, setMode] = useState<Mode>("signin");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
-  async function onRequest(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    const res = await requestOtp(email);
-    setBusy(false);
-    if (res.ok) {
-      setStep("code");
-      setMsg({ ok: true, text: res.message ?? "Code sent." });
-    } else {
-      setMsg({ ok: false, text: res.error });
-    }
-  }
-
-  async function onVerify(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setMsg(null);
-    const res = await verifyOtp(email, code);
-    // On success verifyOtp redirects; we only get here on error.
+    const res =
+      mode === "signin"
+        ? await signInWithPassword(email, password)
+        : await signUpWithPassword(email, password, fullName);
+    // On success the action redirects; we only reach here on error / info.
     setBusy(false);
     if (!res.ok) setMsg({ ok: false, text: res.error });
+    else if (res.message) setMsg({ ok: true, text: res.message });
   }
 
   return (
     <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-      <h1 className="font-display text-2xl font-extrabold text-navy">
-        {step === "email" ? "School & member login" : "Enter your code"}
-      </h1>
-      <p className="mt-1 text-sm text-slate-500">
-        {step === "email"
-          ? "We'll email you a secure 6-digit code — no password needed."
-          : `Sent to ${email}. Check your inbox.`}
-      </p>
-
-      {step === "email" ? (
-        <form onSubmit={onRequest} className="mt-6 space-y-4" noValidate>
-          <Label>
-            <LabelText>Email address</LabelText>
-            <input
-              type="email"
-              autoComplete="email"
-              className={fieldClasses}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </Label>
-          {msg && <FormAlert tone={msg.ok ? "success" : "error"}>{msg.text}</FormAlert>}
+      {/* Tabs */}
+      <div className="mb-6 grid grid-cols-2 rounded-lg bg-mist p-1 text-sm font-semibold">
+        {(["signin", "signup"] as Mode[]).map((m) => (
           <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-lg bg-orange px-6 py-3 font-bold text-navy transition-colors hover:bg-orange-600 disabled:opacity-60"
-          >
-            {busy ? "Sending…" : "Send me a code"}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={onVerify} className="mt-6 space-y-4" noValidate>
-          <Label>
-            <LabelText>6-digit code</LabelText>
-            <input
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              className={`${fieldClasses} tracking-[0.4em]`}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              required
-            />
-          </Label>
-          {msg && <FormAlert tone={msg.ok ? "success" : "error"}>{msg.text}</FormAlert>}
-          <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-lg bg-orange px-6 py-3 font-bold text-navy transition-colors hover:bg-orange-600 disabled:opacity-60"
-          >
-            {busy ? "Verifying…" : "Verify & sign in"}
-          </button>
-          <button
+            key={m}
             type="button"
             onClick={() => {
-              setStep("email");
-              setCode("");
+              setMode(m);
               setMsg(null);
             }}
-            className="w-full text-sm font-semibold text-dusty-600 hover:underline"
+            className={`rounded-md py-2 transition-colors ${
+              mode === m ? "bg-white text-navy shadow-sm" : "text-slate-500"
+            }`}
           >
-            ← Use a different email
+            {m === "signin" ? "Sign in" : "Create account"}
           </button>
-        </form>
-      )}
+        ))}
+      </div>
+
+      <h1 className="font-display text-2xl font-extrabold text-navy">
+        {mode === "signin" ? "Welcome back" : "Create your account"}
+      </h1>
+      <p className="mt-1 text-sm text-slate-500">
+        {mode === "signin"
+          ? "Sign in with your email and password."
+          : "Schools, coordinators and members — start here."}
+      </p>
+
+      <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+        {mode === "signup" && (
+          <Label>
+            <LabelText>Full name</LabelText>
+            <input
+              type="text"
+              autoComplete="name"
+              className={fieldClasses}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+          </Label>
+        )}
+        <Label>
+          <LabelText>Email address</LabelText>
+          <input
+            type="email"
+            autoComplete="email"
+            className={fieldClasses}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </Label>
+        <Label>
+          <LabelText>Password</LabelText>
+          <input
+            type="password"
+            autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            className={fieldClasses}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+          />
+          {mode === "signup" && (
+            <span className="mt-1 block text-xs text-slate-400">
+              At least 8 characters.
+            </span>
+          )}
+        </Label>
+
+        {msg && <FormAlert tone={msg.ok ? "success" : "error"}>{msg.text}</FormAlert>}
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="w-full rounded-lg bg-orange px-6 py-3 font-bold text-navy transition-colors hover:bg-orange-600 disabled:opacity-60"
+        >
+          {busy
+            ? "Please wait…"
+            : mode === "signin"
+              ? "Sign in"
+              : "Create account"}
+        </button>
+      </form>
     </div>
   );
 }

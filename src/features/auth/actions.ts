@@ -3,10 +3,10 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured, clientEnv } from "@/lib/env";
+import { isSupabaseConfigured } from "@/lib/env";
 
 const emailSchema = z.string().email();
-const otpSchema = z.string().regex(/^\d{6}$/, "Enter the 6-digit code.");
+const passwordSchema = z.string().min(8, "Password must be at least 8 characters.");
 
 export type AuthResult =
   | { ok: true; message?: string }
@@ -16,49 +16,64 @@ const NOT_CONFIGURED =
   "Login is not available yet — Supabase isn't configured. See supabase/README.md.";
 
 /**
- * Step 1: email a 6-digit OTP (and magic link). Creates the user if new.
- */
-export async function requestOtp(email: string): Promise<AuthResult> {
-  if (!isSupabaseConfigured) return { ok: false, error: NOT_CONFIGURED };
-
-  const parsed = emailSchema.safeParse(email.trim());
-  if (!parsed.success) return { ok: false, error: "Enter a valid email address." };
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email: parsed.data,
-    options: {
-      shouldCreateUser: true,
-      emailRedirectTo: `${clientEnv.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
-    },
-  });
-
-  if (error) return { ok: false, error: error.message };
-  return { ok: true, message: "We've emailed you a 6-digit code and a sign-in link." };
-}
-
-/**
- * Step 2: verify the OTP code. On success the session cookie is set and we
+ * Sign in with email + password. On success the session cookie is set and we
  * redirect into the portal.
  */
-export async function verifyOtp(email: string, token: string): Promise<AuthResult> {
+export async function signInWithPassword(
+  email: string,
+  password: string
+): Promise<AuthResult> {
   if (!isSupabaseConfigured) return { ok: false, error: NOT_CONFIGURED };
 
   const e = emailSchema.safeParse(email.trim());
-  const t = otpSchema.safeParse(token.trim());
-  if (!e.success || !t.success) {
-    return { ok: false, error: "Check the email and 6-digit code." };
-  }
+  if (!e.success) return { ok: false, error: "Enter a valid email address." };
+  if (!password) return { ok: false, error: "Enter your password." };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
+  const { error } = await supabase.auth.signInWithPassword({
     email: e.data,
-    token: t.data,
-    type: "email",
+    password,
   });
-
   if (error) return { ok: false, error: error.message };
   redirect("/portal");
+}
+
+/**
+ * Create an account with email + password.
+ * If "Confirm email" is OFF in Supabase, a session is created immediately and we
+ * redirect. If it's ON, we ask the user to confirm via email.
+ */
+export async function signUpWithPassword(
+  email: string,
+  password: string,
+  fullName?: string
+): Promise<AuthResult> {
+  if (!isSupabaseConfigured) return { ok: false, error: NOT_CONFIGURED };
+
+  const e = emailSchema.safeParse(email.trim());
+  const p = passwordSchema.safeParse(password);
+  if (!e.success) return { ok: false, error: "Enter a valid email address." };
+  if (!p.success)
+    return {
+      ok: false,
+      error: p.error.issues[0]?.message ?? "Password must be at least 8 characters.",
+    };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signUp({
+    email: e.data,
+    password: p.data,
+    options: { data: { full_name: fullName?.trim() || undefined } },
+  });
+  if (error) return { ok: false, error: error.message };
+
+  if (data.session) {
+    redirect("/portal");
+  }
+  return {
+    ok: true,
+    message: "Account created. Please check your email to confirm, then sign in.",
+  };
 }
 
 /** Sign the current user out and return to the homepage. */

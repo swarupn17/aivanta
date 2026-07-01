@@ -40,14 +40,17 @@ This:
 - enables RLS on every table and adds role-aware policies
 - blocks non-admins from changing their own role
 
-## 5. Configure email OTP
+## 5. Configure email + password auth (no emails needed for now)
 Supabase → **Authentication → Providers → Email**:
-- Enable **Email OTP** (and/or magic links).
-- Under **Email Templates → Magic Link**, make sure the template includes the
-  `{{ .Token }}` (6-digit code) if you want code-based login. The default also
-  works for the magic-link flow we support.
-- Add your site URL + `.../auth/confirm` to **URL Configuration → Redirect URLs**
-  (e.g. `http://localhost:3000/**` and your Vercel domain).
+- Make sure **Email** is enabled.
+- **Turn OFF "Confirm email"** — this lets accounts sign in immediately with
+  email + password and sends **zero emails** (avoids the built-in email rate
+  limit while testing). You can re-enable confirmation + OTP later once custom
+  SMTP is set up.
+
+(OTP / magic links are coming later; when you add them, configure a custom SMTP
+provider and the `{{ .Token }}` email template, and add your site URL to
+**URL Configuration → Redirect URLs**.)
 
 ## 6. Make yourself an admin
 After you log in once, run in the SQL Editor (replace the email):
