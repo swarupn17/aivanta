@@ -125,6 +125,12 @@ export function Header() {
 
             <div className="flex items-center gap-2">
               <Link
+                href="/login"
+                className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-mist sm:inline-flex"
+              >
+                Login
+              </Link>
+              <Link
                 href="/registration"
                 className="hidden items-center gap-2 rounded-lg bg-orange px-4 py-2.5 text-sm font-bold text-navy transition-colors hover:bg-orange-600 sm:inline-flex"
               >
@@ -172,7 +178,14 @@ export function Header() {
               ))}
             </div>
           ))}
-          <div className="p-4">
+          <div className="space-y-2 p-4">
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="block rounded-lg px-4 py-3 text-center font-semibold text-navy ring-1 ring-slate-200"
+            >
+              Login
+            </Link>
             <Link
               href="/registration"
               onClick={() => setMobileOpen(false)}

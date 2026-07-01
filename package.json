@@ -15,9 +15,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:migrate": "node --env-file-if-exists=.env.local ./node_modules/.bin/drizzle-kit migrate",
+    "db:push": "node --env-file-if-exists=.env.local ./node_modules/.bin/drizzle-kit push",
+    "db:studio": "node --env-file-if-exists=.env.local ./node_modules/.bin/drizzle-kit studio"
   },
   "dependencies": {
     "next": "^16.2.9",

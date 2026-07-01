@@ -1,6 +1,8 @@
 "use server";
 
 import { contactSchema, type ContactInput } from "./schema";
+import { isSupabaseConfigured } from "@/lib/env";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type ActionResult =
   | { ok: true; message: string }
@@ -9,9 +11,9 @@ export type ActionResult =
 /**
  * Server Action: submit a contact message.
  *
- * This runs ON THE SERVER (the "backend" half of our Next.js app). Right now it
- * validates and logs; wiring it to Supabase (insert into a `contact_messages`
- * table + email notification) is a drop-in next step — the boundary is already here.
+ * Runs ON THE SERVER. Persists to `contact_messages` via the service-role client
+ * (public form, no authenticated user). Falls back to logging when Supabase
+ * isn't configured yet, so the form always works in dev.
  */
 export async function submitContactMessage(
   input: ContactInput
@@ -21,10 +23,22 @@ export async function submitContactMessage(
     return { ok: false, error: "Please check the form and try again." };
   }
 
-  // TODO(persist): const supabase = await createClient();
-  //   await supabase.from("contact_messages").insert(parsed.data);
-  //   + trigger transactional email via Supabase Edge Function.
-  console.info("[contact] new message", parsed.data);
+  if (!isSupabaseConfigured) {
+    console.info("[contact] (not persisted — Supabase off)", parsed.data);
+  } else {
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("contact_messages").insert({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      phone: parsed.data.phone ?? null,
+      role: parsed.data.role,
+      message: parsed.data.message,
+    });
+    if (error) {
+      console.error("[contact] insert failed", error);
+      return { ok: false, error: "Something went wrong. Please email us directly." };
+    }
+  }
 
   return {
     ok: true,

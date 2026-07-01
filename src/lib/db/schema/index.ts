@@ -7,3 +7,4 @@ export * from "./profiles";
 export * from "./schools";
 export * from "./students";
 export * from "./exams";
+export * from "./leads";
