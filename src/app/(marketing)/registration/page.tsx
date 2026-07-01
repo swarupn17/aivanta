@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 };
 
 const STEPS = [
-  { n: "1", title: "Submit details", body: "Fill the school registration form below." },
-  { n: "2", title: "Enrol students", body: "Upload your student list; roll numbers are assigned." },
-  { n: "3", title: "Assess & reward", body: "Conduct the exam; get results & certificates." },
+  { n: "1", title: "Submit a request", body: "Fill the form below — this sends your details to our team for review." },
+  { n: "2", title: "Get approved", body: "An administrator verifies your school and emails you a unique school code." },
+  { n: "3", title: "Claim & enrol", body: "Log in, enter your code, then enrol students for the cycle." },
 ];
 
 export default function RegistrationPage() {

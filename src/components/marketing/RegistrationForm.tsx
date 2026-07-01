@@ -173,11 +173,11 @@ export function RegistrationForm() {
         disabled={isSubmitting}
         className="w-full rounded-lg bg-orange px-8 py-3.5 font-bold text-navy transition-colors hover:bg-orange-600 disabled:opacity-60 sm:w-auto"
       >
-        {isSubmitting ? "Submitting…" : "Submit registration"}
+        {isSubmitting ? "Submitting…" : "Submit request"}
       </button>
       <p className="text-xs text-slate-400">
-        Online payment goes live soon. For now our team will reach out to confirm
-        your registration.
+        This sends a request for review. Once approved, we&apos;ll email you a
+        school code to claim your account and enrol students.
       </p>
     </form>
   );

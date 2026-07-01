@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/features/auth/queries";
+import { canApprove, getMySchool } from "@/features/schools/queries";
+import { ClaimSchoolForm } from "@/components/portal/ClaimSchoolForm";
 import {
   IconClipboard,
   IconUsers,
@@ -12,7 +14,6 @@ import type { Profile } from "@/lib/db/schema";
 
 type Role = NonNullable<Profile["role"]>;
 
-/** Role-aware quick actions. Cards link to areas we'll build out next. */
 const ACTIONS: Record<Role, { title: string; body: string; href: string; Icon: typeof IconUsers }[]> = {
   school: [
     { title: "Enrol students", body: "Add or bulk-upload students for this cycle.", href: "/portal", Icon: IconUsers },
@@ -24,12 +25,12 @@ const ACTIONS: Record<Role, { title: string; body: string; href: string; Icon: t
     { title: "Commissions", body: "See earnings and request payouts.", href: "/portal", Icon: IconGrowthChart },
   ],
   admin: [
-    { title: "Approve schools", body: "Review and approve pending registrations.", href: "/portal", Icon: IconShieldCheck },
+    { title: "Review requests", body: "Approve schools & generate their codes.", href: "/portal/leads", Icon: IconShieldCheck },
     { title: "Exams & content", body: "Manage the exam catalog and pages.", href: "/portal", Icon: IconBookOpen },
     { title: "Results", body: "Upload OMR data and publish results.", href: "/portal", Icon: IconGrowthChart },
   ],
   super_admin: [
-    { title: "Approve schools", body: "Review and approve pending registrations.", href: "/portal", Icon: IconShieldCheck },
+    { title: "Review requests", body: "Approve schools & generate their codes.", href: "/portal/leads", Icon: IconShieldCheck },
     { title: "Exams & content", body: "Manage the exam catalog and pages.", href: "/portal", Icon: IconBookOpen },
     { title: "Results", body: "Upload OMR data and publish results.", href: "/portal", Icon: IconGrowthChart },
   ],
@@ -44,11 +45,15 @@ const ACTIONS: Record<Role, { title: string; body: string; href: string; Icon: t
   ],
 };
 
+// Roles that might actually be an unclaimed school (default signups).
+const CAN_CLAIM: Role[] = ["student", "parent"];
+
 export default async function PortalDashboard() {
   const user = await getCurrentUser();
   const role = (user?.profile?.role ?? "student") as Role;
   const name = user?.profile?.fullName || user?.email || "there";
   const cards = ACTIONS[role] ?? ACTIONS.student;
+  const school = role === "school" && user ? await getMySchool(user.id) : null;
 
   return (
     <div>
@@ -59,9 +64,27 @@ export default async function PortalDashboard() {
         Welcome, {name}
       </h1>
       <p className="mt-2 max-w-2xl text-slate-600">
-        This is your {role.replace("_", " ")} workspace. The modules below are
-        being built out — your account, role and secure session are all live.
+        {school
+          ? `You're managing ${school.name}.`
+          : `This is your ${role.replace("_", " ")} workspace.`}
       </p>
+
+      {canApprove(role) && (
+        <Link
+          href="/portal/leads"
+          className="lift mt-6 flex items-center gap-4 rounded-2xl bg-navy p-5 text-white"
+        >
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10">
+            <IconShieldCheck className="h-6 w-6" />
+          </span>
+          <span>
+            <span className="font-display text-lg font-bold">Review registration requests</span>
+            <span className="mt-0.5 block text-sm text-slate-200">
+              Approve schools and generate their claim codes.
+            </span>
+          </span>
+        </Link>
+      )}
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
@@ -79,10 +102,11 @@ export default async function PortalDashboard() {
         ))}
       </div>
 
-      <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-6 text-sm text-slate-500">
-        Coming next: live data for these modules (students, registrations,
-        payments, results) wired to Supabase with row-level security already in place.
-      </div>
+      {CAN_CLAIM.includes(role) && (
+        <div className="mt-8">
+          <ClaimSchoolForm />
+        </div>
+      )}
     </div>
   );
 }

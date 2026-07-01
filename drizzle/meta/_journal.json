@@ -15,6 +15,13 @@
       "when": 1782918453003,
       "tag": "0001_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782924889374,
+      "tag": "0002_school_codes",
+      "breakpoints": true
     }
   ]
 }
