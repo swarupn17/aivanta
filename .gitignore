@@ -3,13 +3,28 @@
 Thumbs.db
 *.swp
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 
-# Dependencies / build (for future backend phase)
+# ---- Node / Next.js ----
 node_modules/
-venv/
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# ---- env / secrets ----
 .env
+.env*.local
+.env.local
+
+# ---- python (legacy tooling) ----
+venv/
 __pycache__/
+
+# ---- vercel ----
+.vercel
 
 # Never commit PII / student data files
 *student*.csv
@@ -18,4 +33,7 @@ __pycache__/
 
 # Source / reference & internal docs - NOT for the public repo or live site
 # (brand source PNGs, brochure PDF, business-strategy notes, PRDs, raw syllabus dump)
+temp/
 docs/
+
+# NOTE: /drizzle migrations ARE committed on purpose (schema history).

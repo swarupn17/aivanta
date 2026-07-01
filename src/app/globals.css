@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Aivanta Scholar Foundation - design tokens (Tailwind v4 @theme)
+   "Classic Blue" trust palette - minimalist & elegant.
+     Navy #0D3B66 (primary) - Dusty #7F9DB1 (accent) - Sky #B4D6E3 (soft)
+   These generate utilities: bg-navy, text-dusty-600, bg-sky, etc.
+   ============================================================ */
+@theme {
+  --color-navy: #0d3b66;
+  --color-navy-700: #0a2f52;
+  --color-navy-800: #082742;
+  --color-navy-900: #061f36;
+  --color-dusty: #7f9db1;
+  --color-dusty-600: #4a6884;
+  --color-sky: #b4d6e3;
+  --color-mist: #eef4f8;
+  --color-orange: #f08a5a;
+  --color-orange-600: #e0703a;
+  --color-ink: #1f2937;
+  --color-paper: #f6f9fb;
+
+  --font-display: "Poppins", "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Keep CSS custom props too, so ported component CSS below can reference them. */
+:root {
+  --asf-navy: #0d3b66;
+  --asf-navy-700: #0a2f52;
+  --asf-navy-900: #061f36;
+  --asf-dusty: #7f9db1;
+  --asf-dusty-600: #4a6884;
+  --asf-sky: #b4d6e3;
+  --asf-mist: #eef4f8;
+  --asf-orange: #f08a5a;
+  --asf-orange-600: #e0703a;
+  --asf-ink: #1f2937;
+  --asf-paper: #f6f9fb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--asf-ink);
+  background: #ffffff;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* ---- Accent hairline (subtle blue gradient) ---- */
+.tricolour-strip {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--asf-navy) 0%,
+    var(--asf-dusty) 55%,
+    var(--asf-sky) 100%
+  );
+}
+
+/* ---- Skip link for accessibility ---- */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--asf-navy);
+  color: #ffffff;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  z-index: 100;
+  border-radius: 0 0 0.5rem 0;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* ---- Visible focus rings (WCAG 2.2) ---- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--asf-dusty-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---- Nav dropdown ---- */
+.nav-item > .nav-dropdown {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: all 0.18s ease;
+}
+.nav-item:hover > .nav-dropdown,
+.nav-item:focus-within > .nav-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ---- Hero carousel (stacked-grid: banner is always as tall as tallest slide) ---- */
+.carousel-track {
+  display: grid;
+}
+.carousel-slide {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  pointer-events: none;
+  display: flex;
+  min-height: 460px;
+}
+.carousel-slide > div {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+@media (min-width: 768px) {
+  .carousel-slide {
+    min-height: 540px;
+  }
+}
+.carousel-slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.carousel-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+}
+.carousel-dot.is-active {
+  background: var(--asf-sky);
+  width: 32px;
+}
+
+/* ---- Announcement ticker ---- */
+.ticker-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker-scroll 32s linear infinite;
+}
+.ticker-wrap:hover .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---- Card hover lift (subtle, elegant) ---- */
+.lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -16px rgba(13, 59, 102, 0.28);
+}
+
+/* ---- Reveal on scroll ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- Smooth interactive feedback ---- */
+a,
+button,
+select,
+summary,
+[role="button"],
+.lift,
+input[type="submit"] {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.25s ease;
+}
+
+button:active,
+[role="button"]:active,
+input[type="submit"]:active {
+  transform: scale(0.95);
+}
+
+.lift:active {
+  transform: translateY(-3px) scale(0.99);
+}
+.carousel-dot:active {
+  transform: scale(0.85);
+}
+
+/* ---- Page fade-in on load ---- */
+@keyframes asf-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+main {
+  animation: asf-page-in 0.45s ease both;
+}
+
+/* ---- Syllabus content swap fade ---- */
+.syllabus-units {
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease;
+}
+.syllabus-units.is-swapping {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .ticker-track {
+    animation: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .carousel-slide {
+    transition: none;
+  }
+  main {
+    animation: none;
+  }
+  a,
+  button,
+  select,
+  summary,
+  [role="button"],
+  .lift,
+  input[type="submit"] {
+    transition: none;
+  }
+  button:active,
+  [role="button"]:active,
+  .lift:active {
+    transform: none;
+  }
+  .syllabus-units {
+    transition: none;
+  }
+  .syllabus-units.is-swapping {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Subject brand accents ---- */
+.subj-fia {
+  --accent: #0d3b66;
+}
+.subj-cia {
+  --accent: #5c7a93;
+}
+.subj-aia {
+  --accent: #7f9db1;
+}

@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+build
+legacy
+docs
+drizzle
+pnpm-lock.yaml
+package-lock.json
