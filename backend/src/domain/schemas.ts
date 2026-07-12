@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * Server-side validation schemas — the API's trust boundary. These MUST mirror
- * the frontend schemas (src/features/*/schema.ts). Keep them in sync; the client
+ * the frontend schemas (src/features/<name>/schema.ts). Keep them in sync; the client
  * validates for UX, the server validates for safety. Never trust the client.
  */
 
