@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "@/config/site";
-import { parseStudentsCsv, commitEnrolments, type CommitRow } from "@/features/students/actions";
-import { templateCsv, type ParsedStudent } from "@/features/students/parse";
+import { commitEnrolments, type CommitRow } from "@/features/students/api";
+import { parseCsv, templateCsv, type ParsedStudent } from "@/features/students/parse";
 import { fieldClasses, FormAlert } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 
@@ -63,13 +63,23 @@ export function StudentUploader() {
     if (!file) return;
     setMsg(null);
     const text = await file.text();
-    const res = await parseStudentsCsv(text);
-    if (res.ok) {
-      setRows(res.rows);
-      setMsg({ ok: true, text: `Loaded ${res.rows.length} rows. Review, edit, then confirm.` });
-    } else {
-      setMsg({ ok: false, text: res.error });
+    if (!text.trim()) {
+      setMsg({ ok: false, text: "The file looks empty." });
+      e.target.value = "";
+      return;
     }
+    // Pure, client-side parse — no server round-trip needed for validation.
+    const parsed = parseCsv(text);
+    if (parsed.length === 0) {
+      setMsg({
+        ok: false,
+        text: "No rows found. Use the template and include a header row.",
+      });
+      e.target.value = "";
+      return;
+    }
+    setRows(parsed);
+    setMsg({ ok: true, text: `Loaded ${parsed.length} rows. Review, edit, then confirm.` });
     e.target.value = "";
   }
 

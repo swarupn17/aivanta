@@ -8,7 +8,7 @@ import {
   APPLICANT_ROLES,
   type RegistrationInput,
 } from "@/features/registration/schema";
-import { submitRegistration } from "@/features/registration/actions";
+import { submitRegistration } from "@/features/registration/api";
 import {
   fieldClasses,
   Label,
