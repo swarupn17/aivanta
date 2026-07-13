@@ -47,7 +47,15 @@ export async function submitRegistration(
     });
     if (error) {
       console.error("[registration] insert failed", error);
-      return { ok: false, error: "Something went wrong. Please email us directly." };
+      // Dev: surface the real Postgres error (e.g. "column ... does not exist")
+      // so schema/RLS problems are obvious immediately. Production: stay generic
+      // — never leak DB internals to the public.
+      const detail =
+        process.env.NODE_ENV === "production" ? "" : ` [dev: ${error.message}]`;
+      return {
+        ok: false,
+        error: `Something went wrong. Please email us directly.${detail}`,
+      };
     }
   }
 

@@ -54,13 +54,18 @@ function SchoolLogin() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    const res = await requestSchoolOtp(code, email);
-    setBusy(false);
-    if (res.ok) {
-      setStep("verify");
-      setMsg({ ok: true, text: res.message ?? "Check your email." });
-    } else {
-      setMsg({ ok: false, text: res.error });
+    try {
+      const res = await requestSchoolOtp(code, email);
+      if (res.ok) {
+        setStep("verify");
+        setMsg({ ok: true, text: res.message ?? "Check your email." });
+      } else {
+        setMsg({ ok: false, text: res.error });
+      }
+    } catch {
+      setMsg({ ok: false, text: "Couldn't reach the server. Please try again." });
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -68,10 +73,15 @@ function SchoolLogin() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    // On success the action redirects into /portal; we only return on error.
-    const res = await verifySchoolOtp(code, email, token);
-    setBusy(false);
-    if (!res.ok) setMsg({ ok: false, text: res.error });
+    try {
+      // On success the action redirects into /portal; we only return on error.
+      const res = await verifySchoolOtp(code, email, token);
+      if (!res.ok) setMsg({ ok: false, text: res.error });
+    } catch {
+      setMsg({ ok: false, text: "Couldn't reach the server. Please try again." });
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -169,10 +179,15 @@ function StaffLogin() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    // On success the action redirects; we only return on error.
-    const res = await signInWithPassword(email, password);
-    setBusy(false);
-    if (!res.ok) setMsg({ ok: false, text: res.error });
+    try {
+      // On success the action redirects; we only return on error.
+      const res = await signInWithPassword(email, password);
+      if (!res.ok) setMsg({ ok: false, text: res.error });
+    } catch {
+      setMsg({ ok: false, text: "Couldn't reach the server. Please try again." });
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (

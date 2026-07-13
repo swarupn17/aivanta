@@ -19,6 +19,13 @@ export type AuthResult =
 const NOT_CONFIGURED =
   "Login is not available yet — Supabase isn't configured. See supabase/README.md.";
 
+/** Best-effort readable message from any thrown value (never yields "{}"). */
+function errMessage(err: unknown): string {
+  if (err instanceof Error && err.message) return err.message;
+  if (typeof err === "string" && err) return err;
+  return "Something went wrong. Please try again.";
+}
+
 /**
  * Sign in with email + password. On success the session cookie is set and we
  * redirect into the portal.
@@ -33,12 +40,17 @@ export async function signInWithPassword(
   if (!e.success) return { ok: false, error: "Enter a valid email address." };
   if (!password) return { ok: false, error: "Enter your password." };
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: e.data,
-    password,
-  });
-  if (error) return { ok: false, error: error.message };
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: e.data,
+      password,
+    });
+    if (error) return { ok: false, error: error.message };
+  } catch (err) {
+    console.error("[signInWithPassword] unexpected", err);
+    return { ok: false, error: errMessage(err) };
+  }
   redirect("/portal");
 }
 
@@ -63,21 +75,25 @@ export async function signUpWithPassword(
       error: p.error.issues[0]?.message ?? "Password must be at least 8 characters.",
     };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email: e.data,
-    password: p.data,
-    options: { data: { full_name: fullName?.trim() || undefined } },
-  });
-  if (error) return { ok: false, error: error.message };
-
-  if (data.session) {
-    redirect("/portal");
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email: e.data,
+      password: p.data,
+      options: { data: { full_name: fullName?.trim() || undefined } },
+    });
+    if (error) return { ok: false, error: error.message };
+    if (!data.session) {
+      return {
+        ok: true,
+        message: "Account created. Please check your email to confirm, then sign in.",
+      };
+    }
+  } catch (err) {
+    console.error("[signUpWithPassword] unexpected", err);
+    return { ok: false, error: errMessage(err) };
   }
-  return {
-    ok: true,
-    message: "Account created. Please check your email to confirm, then sign in.",
-  };
+  redirect("/portal");
 }
 
 /**
@@ -101,28 +117,40 @@ export async function requestSchoolOtp(
 
   const cleanEmail = e.data.toLowerCase();
 
-  // Verify the code + email belong to an approved school before sending an OTP.
-  const admin = createAdminClient();
-  const { data: school } = await admin
-    .from("schools")
-    .select("contact_email, status")
-    .eq("school_code", c.data)
-    .eq("status", "approved")
-    .maybeSingle();
+  try {
+    // Verify the code + email belong to an approved school before sending an OTP.
+    const admin = createAdminClient();
+    const { data: school, error: schoolErr } = await admin
+      .from("schools")
+      .select("contact_email, status")
+      .eq("school_code", c.data)
+      .eq("status", "approved")
+      .maybeSingle();
+    if (schoolErr) {
+      console.error("[requestSchoolOtp] school lookup failed", schoolErr);
+      return { ok: false, error: schoolErr.message };
+    }
 
-  if (!school || (school.contact_email ?? "").toLowerCase() !== cleanEmail) {
-    return {
-      ok: false,
-      error: "That school code and email don't match an approved school.",
-    };
+    if (!school || (school.contact_email ?? "").toLowerCase() !== cleanEmail) {
+      return {
+        ok: false,
+        error: "That school code and email don't match an approved school.",
+      };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: { shouldCreateUser: true },
+    });
+    if (error) {
+      console.error("[requestSchoolOtp] signInWithOtp failed", error);
+      return { ok: false, error: error.message };
+    }
+  } catch (err) {
+    console.error("[requestSchoolOtp] unexpected", err);
+    return { ok: false, error: errMessage(err) };
   }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email: cleanEmail,
-    options: { shouldCreateUser: true },
-  });
-  if (error) return { ok: false, error: error.message };
 
   return { ok: true, message: `We've emailed a 6-digit code to ${cleanEmail}.` };
 }
@@ -148,22 +176,27 @@ export async function verifySchoolOtp(
 
   const cleanEmail = e.data.toLowerCase();
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.verifyOtp({
-    email: cleanEmail,
-    token: t.data,
-    type: "email",
-  });
-  if (error || !data.user) {
-    return { ok: false, error: error?.message ?? "That code is invalid or expired." };
-  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: cleanEmail,
+      token: t.data,
+      type: "email",
+    });
+    if (error || !data.user) {
+      return { ok: false, error: error?.message ?? "That code is invalid or expired." };
+    }
 
-  // Session is now set. Bind the account to its school (elevates role).
-  const linked = await linkSchoolByCodeEmail(c.data, data.user.id, cleanEmail);
-  if (!linked.ok) {
-    // Don't leave a half-authenticated session dangling on a linking failure.
-    await supabase.auth.signOut();
-    return { ok: false, error: linked.error };
+    // Session is now set. Bind the account to its school (elevates role).
+    const linked = await linkSchoolByCodeEmail(c.data, data.user.id, cleanEmail);
+    if (!linked.ok) {
+      // Don't leave a half-authenticated session dangling on a linking failure.
+      await supabase.auth.signOut();
+      return { ok: false, error: linked.error };
+    }
+  } catch (err) {
+    console.error("[verifySchoolOtp] unexpected", err);
+    return { ok: false, error: errMessage(err) };
   }
 
   redirect("/portal");
