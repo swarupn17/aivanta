@@ -8,6 +8,16 @@ aligned with Viksit Bharat 2047.
 This is a **single Next.js app** serving both the frontend and the backend
 (App Router + Server Actions + Route Handlers), backed by **Supabase**.
 
+> **Branch strategy — read this first.**
+> - **`main`** = the **monolith** (this academic year's MVP): one Next.js app on
+>   **Vercel + Supabase**. Server Actions are the mutation layer. Do all
+>   this-year work here.
+> - **`scalable-v2`** = the **future scalable** architecture: the app split into
+>   a standalone **Node/Express API** (`backend/`) + Next.js frontend, with its
+>   own AWS deployment runbook (`docs/07-aws-deployment.md`). Dormant on purpose
+>   — pick it up only when the monolith stops being enough. It's one repo, two
+>   branches: no code is duplicated, nothing is lost.
+
 ---
 
 ## Tech stack
