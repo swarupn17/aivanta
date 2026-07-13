@@ -49,8 +49,26 @@ export async function linkSchoolByCodeEmail(
     return { ok: false, error: "That email doesn't match this school code." };
   }
 
-  // Already linked to this user? Idempotent success (normal re-login).
+  // Ensure the profile role is 'school' (idempotent). This self-heals accounts
+  // that were linked before 03_school_codes.sql patched the role-change guard,
+  // when the elevation was silently rejected. Never downgrades an admin.
+  async function ensureSchoolRole() {
+    const { error } = await admin
+      .from("profiles")
+      .update({ role: "school" })
+      .eq("id", userId)
+      .neq("role", "school")
+      .not("role", "in", "(admin,super_admin)");
+    if (error) {
+      console.error("[linkSchoolByCodeEmail] role elevation failed", error);
+    }
+  }
+
+  // Already linked to this user? Make sure the role is right, then idempotent
+  // success (normal re-login — and heals a stuck role).
   if (school.owner_profile_id === userId) {
+    await ensureSchoolRole();
+    revalidatePath("/portal");
     return { ok: true, message: `Welcome back — ${school.name}.` };
   }
   // Linked to a different account? Refuse.
@@ -67,8 +85,7 @@ export async function linkSchoolByCodeEmail(
     .eq("id", school.id);
   if (updErr) return { ok: false, error: updErr.message };
 
-  // Elevate the user's role to 'school' (service-role bypasses the role guard).
-  await admin.from("profiles").update({ role: "school" }).eq("id", userId);
+  await ensureSchoolRole();
 
   revalidatePath("/portal");
   return {

@@ -57,8 +57,13 @@ export default async function PortalDashboard() {
     return <AdminDashboard stats={stats} name={name} />;
   }
 
-  const cards = ACTIONS[role] ?? ACTIONS.student;
-  const school = role === "school" && user ? await getMySchool(user.id) : null;
+  // Ownership is the source of truth: a user who owns a school IS a school user,
+  // even if the role column lagged (e.g. the role-guard trigger blocked the
+  // elevation before 03_school_codes.sql was applied). Keeps this correct
+  // regardless of DB drift.
+  const school = user ? await getMySchool(user.id) : null;
+  const effectiveRole: Role = school ? "school" : role;
+  const cards = ACTIONS[effectiveRole] ?? ACTIONS.student;
 
   return (
     <div>
@@ -71,7 +76,7 @@ export default async function PortalDashboard() {
       <p className="mt-2 max-w-2xl text-slate-600">
         {school
           ? `You're managing ${school.name}.`
-          : `This is your ${role.replace("_", " ")} workspace.`}
+          : `This is your ${effectiveRole.replace("_", " ")} workspace.`}
       </p>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
