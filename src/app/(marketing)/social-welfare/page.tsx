@@ -81,7 +81,7 @@ export default function SocialWelfarePage() {
         </Reveal>
         <Reveal className="grid grid-cols-3 gap-4 text-center">
           {IMPACT.map((i) => (
-            <div key={i.label} className="rounded-2xl bg-paper p-6 ring-1 ring-slate-200">
+            <div key={i.label} className="rounded-2xl bg-paper p-4 ring-1 ring-slate-200 sm:p-6">
               <p className="font-display text-2xl font-extrabold text-navy">{i.big}</p>
               <p className="mt-1 text-xs text-slate-600">{i.label}</p>
             </div>

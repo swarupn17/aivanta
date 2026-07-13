@@ -110,6 +110,27 @@ select:focus-visible,
   transform: translateY(0);
 }
 
+/* ---- Mobile nav (collapsible slide-down)
+   Uses the grid-rows 0fr->1fr trick so the menu animates to its natural
+   height (no magic max-height that clips tall menus). Closed = 0 height,
+   the inner wrapper's overflow:hidden keeps the border/links from peeking.
+   Wrapped in @layer components so Tailwind's `lg:hidden` utility (utilities
+   layer) still wins on desktop and hides the whole thing. */
+@layer components {
+  .asf-mnav {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s ease;
+  }
+  .asf-mnav > .asf-mnav-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .asf-mnav.is-open {
+    grid-template-rows: 1fr;
+  }
+}
+
 /* ---- Hero carousel (stacked-grid: banner is always as tall as tallest slide) ---- */
 .carousel-track {
   display: grid;
@@ -287,6 +308,9 @@ main {
   .syllabus-units.is-swapping {
     opacity: 1;
     transform: none;
+  }
+  .asf-mnav {
+    transition: none;
   }
 }
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 
@@ -18,6 +18,13 @@ export const metadata: Metadata = {
     description: siteConfig.org.tagline,
     type: "website",
   },
+};
+
+// Mobile-first scaling. initialScale:1 + device-width = proper phone rendering.
+// No maximum-scale / user-scalable=no — pinch-zoom stays enabled (WCAG 2.2 AA).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

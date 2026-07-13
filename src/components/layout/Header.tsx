@@ -150,49 +150,49 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile nav */}
+        {/* Mobile nav — collapsible; .asf-mnav animates height via CSS grid */}
         <div
           id="mobile-nav"
-          className={cn("asf-mnav border-t border-slate-100 bg-white lg:hidden", {
-            "is-open": mobileOpen,
-          })}
+          className={cn("asf-mnav lg:hidden", { "is-open": mobileOpen })}
         >
-          {mainNav.map((item) => (
-            <div key={item.key}>
-              <Link
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className="block border-b border-slate-100 px-4 py-3 font-semibold text-slate-800"
-              >
-                {item.label}
-              </Link>
-              {item.children?.map((child) => (
+          <div className="asf-mnav-inner border-t border-slate-100 bg-white">
+            {mainNav.map((item) => (
+              <div key={item.key}>
                 <Link
-                  key={child.href}
-                  href={child.href}
+                  href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block border-b border-slate-100 px-8 py-2.5 text-sm text-slate-600"
+                  className="block border-b border-slate-100 px-4 py-3 font-semibold text-slate-800"
                 >
-                  – {child.label}
+                  {item.label}
                 </Link>
-              ))}
+                {item.children?.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="block border-b border-slate-100 px-8 py-2.5 text-sm text-slate-600"
+                  >
+                    – {child.label}
+                  </Link>
+                ))}
+              </div>
+            ))}
+            <div className="space-y-2 p-4">
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-lg px-4 py-3 text-center font-semibold text-navy ring-1 ring-slate-200"
+              >
+                Login
+              </Link>
+              <Link
+                href="/registration"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-lg bg-orange px-4 py-3 text-center font-bold text-navy transition-colors hover:bg-orange-600"
+              >
+                Register School
+              </Link>
             </div>
-          ))}
-          <div className="space-y-2 p-4">
-            <Link
-              href="/login"
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-lg px-4 py-3 text-center font-semibold text-navy ring-1 ring-slate-200"
-            >
-              Login
-            </Link>
-            <Link
-              href="/registration"
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-lg bg-orange px-4 py-3 text-center font-bold text-navy transition-colors hover:bg-orange-600"
-            >
-              Register School
-            </Link>
           </div>
         </div>
       </div>
