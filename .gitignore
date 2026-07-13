@@ -30,10 +30,13 @@ __pycache__/
 *student*.csv
 *students*.xlsx
 *pii*
+# Data/answer sheets dropped at repo root (may contain student data)
+AS Sheet.pdf
 
 # Source / reference & internal docs - NOT for the public repo or live site
-# (brand source PNGs, brochure PDF, business-strategy notes, PRDs, raw syllabus dump)
+# (brand source PNGs, brochure PDF, business-strategy notes, PRDs, raw syllabus dump,
+#  and the internal launch checklist live in temp/)
 temp/
-docs/
 
+# NOTE: /docs IS committed on purpose - it is the developer reference documentation.
 # NOTE: /drizzle migrations ARE committed on purpose (schema history).
