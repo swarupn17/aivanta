@@ -3,6 +3,7 @@
 import { registrationSchema, type RegistrationInput } from "./schema";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendNewRegistrationAdminAlert } from "@/lib/email";
 
 export type RegistrationResult =
   | { ok: true; message: string }
@@ -57,6 +58,17 @@ export async function submitRegistration(
         error: `Something went wrong. Please email us directly.${detail}`,
       };
     }
+
+    // Best-effort admin notification. Never blocks the applicant's success
+    // (the sender is guarded and won't throw).
+    await sendNewRegistrationAdminAlert({
+      applicantName: d.applicantName,
+      applicantEmail: d.applicantEmail,
+      applicantMobile: d.applicantMobile,
+      schoolName: d.schoolName,
+      city: d.city,
+      state: d.state,
+    });
   }
 
   return {

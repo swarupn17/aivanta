@@ -57,3 +57,21 @@ export function serverEnv() {
     DATABASE_URL: process.env.DATABASE_URL,
   });
 }
+
+const emailSchema = z.object({
+  // Resend API key (server-only). Get it from resend.com → API Keys.
+  RESEND_API_KEY: z.string().min(1).optional(),
+  // Verified sender, e.g. `Aivanta Scholar Foundation <noreply@aivanta.in>`.
+  EMAIL_FROM: z.string().min(1).optional(),
+  // Where new-registration alerts go. Falls back to siteConfig.contact.email.
+  ADMIN_NOTIFICATION_EMAIL: z.string().email().optional(),
+});
+
+/** Server-only email (Resend) env. Parsed lazily. */
+export function emailEnv() {
+  return emailSchema.parse({
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL,
+  });
+}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/features/auth/queries";
+import { sendSchoolApprovalEmail } from "@/lib/email";
 import { canApprove } from "./queries";
 
 export type ActionResult =
@@ -61,6 +62,13 @@ export async function approveLead(leadId: string): Promise<ActionResult> {
     .from("registration_leads")
     .update({ status: "approved" })
     .eq("id", leadId);
+
+  // Best-effort: email the school its login code (never blocks approval).
+  await sendSchoolApprovalEmail({
+    to: lead.school_email || lead.applicant_email,
+    schoolName: lead.school_name,
+    code,
+  });
 
   revalidatePath("/portal/leads");
   return { ok: true, message: `Approved. School code: ${code}`, code };
