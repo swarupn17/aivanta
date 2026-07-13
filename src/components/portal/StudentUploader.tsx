@@ -3,9 +3,14 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "@/config/site";
-import { parseStudentsCsv, commitEnrolments, type CommitRow } from "@/features/students/actions";
-import { templateCsv, type ParsedStudent } from "@/features/students/parse";
+import {
+  parseStudentsUpload,
+  commitEnrolments,
+  type CommitRow,
+} from "@/features/students/actions";
+import { type ParsedStudent } from "@/features/students/parse";
 import { fieldClasses, FormAlert } from "@/components/ui/form";
+import { IconDownload } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 type Row = ParsedStudent;
@@ -40,6 +45,7 @@ export function StudentUploader() {
   const [manual, setManual] = useState<Row>(blankManual());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [dragging, setDragging] = useState(false);
 
   const validRows = useMemo(() => rows.filter((r) => rowErrors(r).length === 0), [rows]);
   const enrolments = useMemo(
@@ -48,29 +54,35 @@ export function StudentUploader() {
   );
   const total = enrolments * fee;
 
-  function downloadTemplate() {
-    const blob = new Blob([templateCsv()], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "aivanta-students-template.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+  async function handleFile(file: File) {
+    setMsg(null);
+    setBusy(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await parseStudentsUpload(fd);
+    setBusy(false);
+    if (res.ok) {
+      setRows(res.rows);
+      setMsg({
+        ok: true,
+        text: `Loaded ${res.rows.length} rows. Review, edit, then confirm.`,
+      });
+    } else {
+      setMsg({ ok: false, text: res.error });
+    }
   }
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
-    setMsg(null);
-    const text = await file.text();
-    const res = await parseStudentsCsv(text);
-    if (res.ok) {
-      setRows(res.rows);
-      setMsg({ ok: true, text: `Loaded ${res.rows.length} rows. Review, edit, then confirm.` });
-    } else {
-      setMsg({ ok: false, text: res.error });
-    }
+    if (file) await handleFile(file);
     e.target.value = "";
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) void handleFile(file);
   }
 
   function removeRow(rowNum: number) {
@@ -122,26 +134,66 @@ export function StudentUploader() {
 
   return (
     <div className="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg font-bold text-navy">Import students</h2>
-          <p className="text-sm text-slate-600">
-            Download the template, fill it in Excel, save as CSV, and upload.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={downloadTemplate}
-            className="rounded-lg px-4 py-2 text-sm font-semibold text-navy ring-1 ring-slate-300 hover:bg-mist"
-          >
-            Download template
-          </button>
-          <label className="cursor-pointer rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy-700">
-            Upload CSV
-            <input type="file" accept=".csv,text/csv" className="hidden" onChange={onFile} />
-          </label>
-        </div>
+      <div>
+        <h2 className="font-display text-lg font-bold text-navy">Import students</h2>
+        <p className="text-sm text-slate-600">
+          Two easy steps: download the Excel template, fill it in, then upload it
+          back. We&apos;ll show a preview before anything is saved.
+        </p>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        {/* Step 1: download */}
+        <a
+          href="/portal/students/template"
+          className="lift flex items-center gap-3 rounded-xl bg-mist p-4 ring-1 ring-slate-200"
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white text-navy ring-1 ring-slate-200">
+            <IconDownload className="h-5 w-5" />
+          </span>
+          <span>
+            <span className="block text-sm font-bold text-navy">
+              1. Download template
+            </span>
+            <span className="block text-xs text-slate-500">
+              Excel .xlsx with dropdowns
+            </span>
+          </span>
+        </a>
+
+        {/* Step 2: upload (drag & drop) */}
+        <label
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          className={cn(
+            "flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed p-4 transition-colors",
+            dragging
+              ? "border-navy bg-mist"
+              : "border-slate-300 hover:border-navy hover:bg-mist"
+          )}
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-navy text-white">
+            <UploadIcon />
+          </span>
+          <span>
+            <span className="block text-sm font-bold text-navy">
+              2. {busy ? "Reading file\u2026" : "Upload filled file"}
+            </span>
+            <span className="block text-xs text-slate-500">
+              Drag &amp; drop or click · .xlsx or .csv
+            </span>
+          </span>
+          <input
+            type="file"
+            accept=".xlsx,.xls,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            className="hidden"
+            onChange={onFile}
+          />
+        </label>
       </div>
 
       {msg && (
@@ -287,5 +339,24 @@ export function StudentUploader() {
         </button>
       </div>
     </div>
+  );
+}
+
+function UploadIcon() {
+  return (
+    <svg
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0-12l-4 4m4-4l4 4"
+      />
+    </svg>
   );
 }

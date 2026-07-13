@@ -1,9 +1,9 @@
 /**
  * Student roster parsing + validation.
  *
- * CSV-first (zero-dependency, works everywhere). Excel users export as CSV.
- * Adding native .xlsx later means only adding one branch that produces the same
- * `RawRow[]` shape — everything downstream is format-agnostic.
+ * Format-agnostic core: both CSV (client-safe, zero-dep) and .xlsx (server, via
+ * exceljs in ./excel.ts) normalise their input into `RawStudentRecord[]` and run
+ * it through `parseRecords`, so the validation rules live in exactly one place.
  */
 
 export type SubjectFlags = { fia: boolean; cia: boolean; aia: boolean };
@@ -20,6 +20,19 @@ export type ParsedStudent = SubjectFlags & {
   warnings: string[];
 };
 
+/** One raw row, already mapped from columns to fields (all strings). */
+export type RawStudentRecord = {
+  name: string;
+  cls: string;
+  section: string;
+  dob: string;
+  parent: string;
+  contact: string;
+  fia: string;
+  cia: string;
+  aia: string;
+};
+
 export const TEMPLATE_HEADERS = [
   "Name",
   "Class",
@@ -34,6 +47,48 @@ export const TEMPLATE_HEADERS = [
 
 const truthy = (v: string) =>
   ["yes", "y", "true", "1", "x"].includes(v.trim().toLowerCase());
+
+/**
+ * Validate normalised records into rows. `rowNum` is 1-based on the DATA (so the
+ * first data row is 2, matching a spreadsheet where row 1 is the header).
+ */
+export function parseRecords(records: RawStudentRecord[]): ParsedStudent[] {
+  const seen = new Set<string>();
+  return records.map((rec, i) => {
+    const fullName = rec.name.trim();
+    const clsRaw = rec.cls.trim();
+    const classLevel = /^\d+$/.test(clsRaw) ? parseInt(clsRaw, 10) : null;
+    const fia = truthy(rec.fia);
+    const cia = truthy(rec.cia);
+    const aia = truthy(rec.aia);
+
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    if (!fullName) errors.push("Name is required");
+    if (classLevel === null || classLevel < 1 || classLevel > 10)
+      errors.push("Class must be 1–10");
+    if (!fia && !cia && !aia) errors.push("Pick at least one subject");
+
+    const key = `${fullName.toLowerCase()}|${clsRaw}`;
+    if (fullName && seen.has(key)) warnings.push("Possible duplicate in file");
+    if (fullName) seen.add(key);
+
+    return {
+      rowNum: i + 2,
+      fullName,
+      classLevel,
+      section: rec.section.trim(),
+      dob: rec.dob.trim(),
+      parentName: rec.parent.trim(),
+      parentContact: rec.contact.trim(),
+      fia,
+      cia,
+      aia,
+      errors,
+      warnings,
+    };
+  });
+}
 
 /** Minimal, robust CSV line splitter (handles quoted fields + commas within). */
 function splitCsvLine(line: string): string[] {
@@ -56,11 +111,9 @@ function splitCsvLine(line: string): string[] {
   return out.map((s) => s.trim());
 }
 
-/** Parse CSV text into validated rows. Never touches the DB. */
+/** Parse CSV text into validated rows. Never touches the DB. Client-safe. */
 export function parseCsv(text: string): ParsedStudent[] {
-  const lines = text
-    .split(/\r?\n/)
-    .filter((l) => l.trim().length > 0);
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) return [];
 
   const header = splitCsvLine(lines[0]!).map((h) => h.toLowerCase());
@@ -77,51 +130,22 @@ export function parseCsv(text: string): ParsedStudent[] {
     aia: col("AIA"),
   };
 
-  const seen = new Set<string>();
-  const rows: ParsedStudent[] = [];
-
+  const records: RawStudentRecord[] = [];
   for (let i = 1; i < lines.length; i++) {
     const cells = splitCsvLine(lines[i]!);
     const get = (n: number) => (n >= 0 && n < cells.length ? cells[n]!.trim() : "");
-
-    const fullName = get(idx.name);
-    const clsRaw = get(idx.cls);
-    const classLevel = /^\d+$/.test(clsRaw) ? parseInt(clsRaw, 10) : null;
-    const fia = idx.fia >= 0 && truthy(get(idx.fia));
-    const cia = idx.cia >= 0 && truthy(get(idx.cia));
-    const aia = idx.aia >= 0 && truthy(get(idx.aia));
-
-    const errors: string[] = [];
-    const warnings: string[] = [];
-    if (!fullName) errors.push("Name is required");
-    if (classLevel === null || classLevel < 1 || classLevel > 10)
-      errors.push("Class must be 1–10");
-    if (!fia && !cia && !aia) errors.push("Pick at least one subject");
-
-    const key = `${fullName.toLowerCase()}|${clsRaw}`;
-    if (fullName && seen.has(key)) warnings.push("Possible duplicate in file");
-    if (fullName) seen.add(key);
-
-    rows.push({
-      rowNum: i + 1,
-      fullName,
-      classLevel,
+    records.push({
+      name: get(idx.name),
+      cls: get(idx.cls),
       section: get(idx.section),
       dob: get(idx.dob),
-      parentName: get(idx.parent),
-      parentContact: get(idx.contact),
-      fia,
-      cia,
-      aia,
-      errors,
-      warnings,
+      parent: get(idx.parent),
+      contact: get(idx.contact),
+      fia: get(idx.fia),
+      cia: get(idx.cia),
+      aia: get(idx.aia),
     });
   }
-  return rows;
+  return parseRecords(records);
 }
 
-/** Build the CSV template string (header + one example row). */
-export function templateCsv(): string {
-  const example = ["Asha Verma", "5", "A", "2015-04-12", "R. Verma", "9999900000", "Yes", "Yes", "No"];
-  return `${TEMPLATE_HEADERS.join(",")}\n${example.join(",")}\n`;
-}

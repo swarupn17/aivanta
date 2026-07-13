@@ -9,18 +9,46 @@ import { parseCsv, type ParsedStudent } from "./parse";
 
 const ACADEMIC_YEAR = "2025-26";
 
-/** Parse uploaded CSV text into a validated preview. Saves nothing. */
-export async function parseStudentsCsv(
-  text: string
-): Promise<{ ok: true; rows: ParsedStudent[] } | { ok: false; error: string }> {
-  if (typeof text !== "string" || !text.trim()) {
-    return { ok: false, error: "The file looks empty." };
+export type ParseResult =
+  | { ok: true; rows: ParsedStudent[] }
+  | { ok: false; error: string };
+
+/**
+ * Parse an uploaded roster FILE (.xlsx or .csv) into a validated preview.
+ * Excel goes through exceljs (lazy-imported, server-only); CSV through parseCsv.
+ * Saves nothing — the user reviews the preview and confirms separately.
+ */
+export async function parseStudentsUpload(formData: FormData): Promise<ParseResult> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Please choose a file to upload." };
   }
-  const rows = parseCsv(text);
-  if (rows.length === 0) {
-    return { ok: false, error: "No rows found. Use the template and include a header row." };
+  const name = file.name.toLowerCase();
+  try {
+    if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+      const { parseXlsx } = await import("./excel");
+      const rows = await parseXlsx(Buffer.from(await file.arrayBuffer()));
+      if (rows.length === 0) {
+        return {
+          ok: false,
+          error: "No student rows found. Use the template's 'Students' sheet (keep the header row).",
+        };
+      }
+      return { ok: true, rows };
+    }
+    // Treat everything else as CSV/text.
+    const rows = parseCsv(await file.text());
+    if (rows.length === 0) {
+      return { ok: false, error: "No rows found. Use the template and keep the header row." };
+    }
+    return { ok: true, rows };
+  } catch (err) {
+    console.error("[parseStudentsUpload]", err);
+    return {
+      ok: false,
+      error: "Couldn't read that file. Please use the Aivanta template (.xlsx or .csv).",
+    };
   }
-  return { ok: true, rows };
 }
 
 const commitSchema = z.object({

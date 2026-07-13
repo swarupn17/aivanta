@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/features/auth/queries";
 import { getMySchool } from "@/features/schools/queries";
 import { listRoster, summarise } from "@/features/students/queries";
 import { StudentUploader } from "@/components/portal/StudentUploader";
-import { RemoveStudentButton } from "@/components/portal/RemoveStudentButton";
+import { RosterTable } from "@/components/portal/RosterTable";
 import { siteConfig } from "@/config/site";
 
 export const metadata = { title: "Students & enrolments" };
@@ -108,56 +108,9 @@ export default async function StudentsPage() {
       )}
 
       {/* Roster */}
-      <h2 className="mt-10 mb-3 text-sm font-semibold uppercase tracking-wider text-dusty-600">
-        Enrolled students ({roster.length})
-      </h2>
-      {roster.length === 0 ? (
-        <p className="rounded-xl bg-white p-6 text-sm text-slate-500 ring-1 ring-slate-200">
-          No students yet. Import a CSV or add them manually above.
-        </p>
-      ) : (
-        <div className="overflow-x-auto rounded-2xl ring-1 ring-slate-200">
-          <table className="w-full min-w-[600px] text-sm">
-            <thead className="bg-mist text-left text-xs uppercase tracking-wider text-dusty-600">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Class</th>
-                <th className="p-3">Subjects</th>
-                <th className="p-3">Status</th>
-                <th className="p-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {roster.map((st) => (
-                <tr key={st.id} className="border-t border-slate-100 bg-white">
-                  <td className="p-3 font-medium text-navy">{st.full_name}</td>
-                  <td className="p-3">
-                    {st.class_level}
-                    {st.section ? `-${st.section}` : ""}
-                  </td>
-                  <td className="p-3">
-                    {st.subjects.map((x) => SUBJECT_LABEL[x] ?? x).join(", ") || "—"}
-                  </td>
-                  <td className="p-3">
-                    <span
-                      className={
-                        st.paid
-                          ? "rounded bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700"
-                          : "rounded bg-mist px-2 py-0.5 text-xs font-semibold text-navy"
-                      }
-                    >
-                      {st.paid ? "Paid" : "Unpaid"}
-                    </span>
-                  </td>
-                  <td className="p-3 text-right">
-                    <RemoveStudentButton id={st.id} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="mt-10">
+        <RosterTable roster={roster} />
+      </div>
     </div>
   );
 }
