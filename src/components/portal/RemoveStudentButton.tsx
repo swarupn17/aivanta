@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { removeStudent } from "@/features/students/api";
+import { removeStudent } from "@/features/students/actions";
 
 export function RemoveStudentButton({ id }: { id: string }) {
   const router = useRouter();

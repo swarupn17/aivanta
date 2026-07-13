@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactSchema, CONTACT_ROLES, type ContactInput } from "@/features/contact/schema";
-import { submitContactMessage } from "@/features/contact/api";
+import { submitContactMessage } from "@/features/contact/actions";
 import {
   fieldClasses,
   Label,
