@@ -67,6 +67,17 @@ export async function listContactMessages(): Promise<ContactMessageRow[]> {
   return (data as ContactMessageRow[]) ?? [];
 }
 
+/** Fast head-count of pending requests (for the nav badge). */
+export async function countPendingLeads(): Promise<number> {
+  if (!isSupabaseConfigured) return 0;
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("registration_leads")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "pending");
+  return count ?? 0;
+}
+
 /** The school owned by the current user (after they've claimed a code), or null. */
 export async function getMySchool(userId: string): Promise<School | null> {
   if (!isSupabaseConfigured) return null;

@@ -4,11 +4,25 @@ import { useState } from "react";
 import { approveLead, rejectLead } from "@/features/schools/actions";
 import type { LeadRowData } from "@/features/schools/queries";
 
-export function LeadRow({ lead }: { lead: LeadRowData }) {
+export function LeadRow({
+  lead,
+  initialCode = null,
+}: {
+  lead: LeadRowData;
+  initialCode?: string | null;
+}) {
   const [status, setStatus] = useState(lead.status);
-  const [code, setCode] = useState<string | null>(null);
+  const [code, setCode] = useState<string | null>(initialCode);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const submitted = lead.created_at
+    ? new Date(lead.created_at).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
 
   async function onApprove() {
     setBusy(true);
@@ -50,8 +64,13 @@ export function LeadRow({ lead }: { lead: LeadRowData }) {
             <p className="mt-1 text-xs text-slate-500">{lead.school_address}</p>
           )}
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ring-1 ${badge}`}>
-          {status}
+        <span className="flex shrink-0 flex-col items-end gap-1">
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ring-1 ${badge}`}>
+            {status}
+          </span>
+          {submitted && (
+            <span className="text-xs text-slate-400">{submitted}</span>
+          )}
         </span>
       </div>
 

@@ -54,16 +54,21 @@ export type SchoolFilters = {
   state?: string;
   district?: string;
   city?: string;
+  q?: string;
 };
 
-/** Apply the cascading filters. Empty/undefined values match everything. */
+/** Apply the cascading filters + free-text search. Empty values match all. */
 export function applyFilters(schools: AdminSchool[], f: SchoolFilters): AdminSchool[] {
+  const q = (f.q ?? "").trim().toLowerCase();
   return schools.filter(
     (s) =>
       (!f.year || s.academic_year === f.year) &&
       (!f.state || s.state === f.state) &&
       (!f.district || s.district === f.district) &&
-      (!f.city || s.city === f.city)
+      (!f.city || s.city === f.city) &&
+      (!q ||
+        s.name.toLowerCase().includes(q) ||
+        (s.school_code ?? "").toLowerCase().includes(q))
   );
 }
 

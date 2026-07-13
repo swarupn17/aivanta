@@ -26,6 +26,7 @@ export default async function AdminSchoolsPage({
     state: sp.state,
     district: sp.district,
     city: sp.city,
+    q: sp.q,
   };
 
   const all = await getAdminSchools();
@@ -35,10 +36,7 @@ export default async function AdminSchoolsPage({
 
   return (
     <div>
-      <Link href="/portal" className="text-sm font-semibold text-dusty-600 hover:underline">
-        ← Dashboard
-      </Link>
-      <h1 className="mt-2 font-display text-3xl font-extrabold text-navy">Schools</h1>
+      <h1 className="font-display text-3xl font-extrabold text-navy">Schools</h1>
       <p className="mt-1 text-slate-600">
         Filter by Year → State → District → City, then open a school to manage its
         classes and students.

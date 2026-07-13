@@ -3,6 +3,8 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/queries";
 import { signOut } from "@/features/auth/actions";
+import { canApprove, countPendingLeads } from "@/features/schools/queries";
+import { AdminNav } from "@/components/portal/AdminNav";
 import { siteConfig } from "@/config/site";
 
 /**
@@ -16,6 +18,8 @@ export default async function PortalLayout({
   if (!user) redirect("/login?redirectTo=/portal");
 
   const role = user.profile?.role ?? "student";
+  const isAdmin = canApprove(role);
+  const pendingCount = isAdmin ? await countPendingLeads() : 0;
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
@@ -50,6 +54,7 @@ export default async function PortalLayout({
           </div>
         </div>
       </header>
+      {isAdmin && <AdminNav pendingCount={pendingCount} />}
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">{children}</main>
     </div>
   );

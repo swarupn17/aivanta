@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/features/auth/queries";
 import { canApprove, getMySchool } from "@/features/schools/queries";
+import { getAdminStats } from "@/features/schools/stats";
+import { AdminDashboard } from "@/components/portal/AdminDashboard";
 import {
   IconClipboard,
   IconUsers,
@@ -48,6 +50,13 @@ export default async function PortalDashboard() {
   const user = await getCurrentUser();
   const role = (user?.profile?.role ?? "student") as Role;
   const name = user?.profile?.fullName || user?.email || "there";
+
+  // Admins get the command center.
+  if (canApprove(role)) {
+    const stats = await getAdminStats();
+    return <AdminDashboard stats={stats} name={name} />;
+  }
+
   const cards = ACTIONS[role] ?? ACTIONS.student;
   const school = role === "school" && user ? await getMySchool(user.id) : null;
 
@@ -64,23 +73,6 @@ export default async function PortalDashboard() {
           ? `You're managing ${school.name}.`
           : `This is your ${role.replace("_", " ")} workspace.`}
       </p>
-
-      {canApprove(role) && (
-        <Link
-          href="/portal/leads"
-          className="lift mt-6 flex items-center gap-4 rounded-2xl bg-navy p-5 text-white"
-        >
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10">
-            <IconShieldCheck className="h-6 w-6" />
-          </span>
-          <span>
-            <span className="font-display text-lg font-bold">Review registration requests</span>
-            <span className="mt-0.5 block text-sm text-slate-200">
-              Approve schools and generate their claim codes.
-            </span>
-          </span>
-        </Link>
-      )}
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
