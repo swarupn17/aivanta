@@ -3,10 +3,14 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { linkSchoolByCodeEmail } from "@/features/schools/link";
 import { isSupabaseConfigured } from "@/lib/env";
 
 const emailSchema = z.string().email();
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters.");
+const codeSchema = z.string().regex(/^\d{5}$/, "Enter your 5-digit school code.");
+const otpSchema = z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your email.");
 
 export type AuthResult =
   | { ok: true; message?: string }
@@ -74,6 +78,95 @@ export async function signUpWithPassword(
     ok: true,
     message: "Account created. Please check your email to confirm, then sign in.",
   };
+}
+
+/**
+ * SCHOOL OTP LOGIN, step 1: verify the school code + email match an approved
+ * school, then send a 6-digit one-time code to that email. No password.
+ *
+ * We check the pairing with the service-role client (RLS blocks anon reads of
+ * `schools`). `shouldCreateUser: true` lets Supabase create the auth user on
+ * first login — safe, because we only get here after the code+email check.
+ */
+export async function requestSchoolOtp(
+  code: string,
+  email: string
+): Promise<AuthResult> {
+  if (!isSupabaseConfigured) return { ok: false, error: NOT_CONFIGURED };
+
+  const c = codeSchema.safeParse(code.trim());
+  const e = emailSchema.safeParse(email.trim());
+  if (!c.success) return { ok: false, error: "Enter your 5-digit school code." };
+  if (!e.success) return { ok: false, error: "Enter a valid email address." };
+
+  const cleanEmail = e.data.toLowerCase();
+
+  // Verify the code + email belong to an approved school before sending an OTP.
+  const admin = createAdminClient();
+  const { data: school } = await admin
+    .from("schools")
+    .select("contact_email, status")
+    .eq("school_code", c.data)
+    .eq("status", "approved")
+    .maybeSingle();
+
+  if (!school || (school.contact_email ?? "").toLowerCase() !== cleanEmail) {
+    return {
+      ok: false,
+      error: "That school code and email don't match an approved school.",
+    };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    email: cleanEmail,
+    options: { shouldCreateUser: true },
+  });
+  if (error) return { ok: false, error: error.message };
+
+  return { ok: true, message: `We've emailed a 6-digit code to ${cleanEmail}.` };
+}
+
+/**
+ * SCHOOL OTP LOGIN, step 2: verify the 6-digit code. On success the session
+ * cookie is set; we then link the account to the school (code+email re-checked)
+ * and redirect into the portal.
+ */
+export async function verifySchoolOtp(
+  code: string,
+  email: string,
+  token: string
+): Promise<AuthResult> {
+  if (!isSupabaseConfigured) return { ok: false, error: NOT_CONFIGURED };
+
+  const c = codeSchema.safeParse(code.trim());
+  const e = emailSchema.safeParse(email.trim());
+  const t = otpSchema.safeParse(token.trim());
+  if (!c.success) return { ok: false, error: "Enter your 5-digit school code." };
+  if (!e.success) return { ok: false, error: "Enter a valid email address." };
+  if (!t.success) return { ok: false, error: "Enter the 6-digit code from your email." };
+
+  const cleanEmail = e.data.toLowerCase();
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: cleanEmail,
+    token: t.data,
+    type: "email",
+  });
+  if (error || !data.user) {
+    return { ok: false, error: error?.message ?? "That code is invalid or expired." };
+  }
+
+  // Session is now set. Bind the account to its school (elevates role).
+  const linked = await linkSchoolByCodeEmail(c.data, data.user.id, cleanEmail);
+  if (!linked.ok) {
+    // Don't leave a half-authenticated session dangling on a linking failure.
+    await supabase.auth.signOut();
+    return { ok: false, error: linked.error };
+  }
+
+  redirect("/portal");
 }
 
 /** Sign the current user out and return to the homepage. */

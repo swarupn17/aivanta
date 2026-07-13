@@ -33,24 +33,39 @@ npm run db:migrate      # applies drizzle/*.sql using DATABASE_URL
 `drizzle/0000_init_schema.sql`, run it.
 
 ## 4. Wire auth + Row-Level Security
-In Supabase → **SQL Editor**, paste and run `supabase/02_auth_rls.sql`.
-This:
-- links `profiles.id` → `auth.users.id`
-- auto-creates a `profiles` row on signup (trigger)
-- enables RLS on every table and adds role-aware policies
-- blocks non-admins from changing their own role
+In Supabase → **SQL Editor**, paste and run these **in order**:
 
-## 5. Configure email + password auth (no emails needed for now)
-Supabase → **Authentication → Providers → Email**:
-- Make sure **Email** is enabled.
-- **Turn OFF "Confirm email"** — this lets accounts sign in immediately with
-  email + password and sends **zero emails** (avoids the built-in email rate
-  limit while testing). You can re-enable confirmation + OTP later once custom
-  SMTP is set up.
+| File | What it does |
+|------|--------------|
+| `supabase/02_auth_rls.sql` | links `profiles.id`→`auth.users.id`, profile-on-signup trigger, RLS + role policies, role-change guard |
+| `supabase/03_school_codes.sql` | school claim-code columns + role-guard patch (lets trusted server code set roles) |
+| `supabase/04_seed_exams.sql` | seeds FIA/CIA/AIA for 2025-26 |
+| `supabase/05_registration_fields.sql` | SOF lead fields + schools hierarchy columns |
+| `supabase/06_school_code_sequence.sql` | **5-digit incremental** `school_code` (sequence + `next_school_code()` default) |
 
-(OTP / magic links are coming later; when you add them, configure a custom SMTP
-provider and the `{{ .Token }}` email template, and add your site URL to
-**URL Configuration → Redirect URLs**.)
+> Already ran the old versions? All of these are idempotent — safe to re-run.
+> `06` is the new one for the incremental code; run it once.
+
+## 5. Configure login (schools use email OTP, staff use password)
+Two login mechanisms now share the `/login` page:
+
+- **Schools** sign in with **school code + school email + a 6-digit email OTP** (no password).
+- **Staff** (admin/coordinator) sign in with **email + password**.
+
+In Supabase → **Authentication**:
+
+1. **Providers → Email:** keep **Email enabled**. You can leave **"Confirm email" OFF** —
+   the OTP itself proves ownership, and password staff accounts sign in immediately.
+2. **Email Templates:** add the code token to **both** templates, because a
+   school's *first* login creates the user (→ **"Confirm signup"** template) while
+   later logins use the **"Magic Link"** template. In each, include a line like:
+   `Your Aivanta login code is: {{ .Token }}`. Without `{{ .Token }}` the email
+   only contains a link and schools won't get a 6-digit code to type.
+3. **SMTP (important for anything beyond local testing):** Supabase's built-in email
+   sender is heavily rate-limited (a few messages/hour) and is for testing only. Wire a
+   real provider under **Project Settings → Authentication → SMTP Settings** (Resend, SES,
+   etc.) before real schools start logging in — otherwise OTP emails will silently
+   throttle.
 
 ## 6. Make yourself an admin
 After you log in once, run in the SQL Editor (replace the email):

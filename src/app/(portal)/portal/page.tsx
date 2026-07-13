@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/features/auth/queries";
 import { canApprove, getMySchool } from "@/features/schools/queries";
-import { ClaimSchoolForm } from "@/components/portal/ClaimSchoolForm";
 import {
   IconClipboard,
   IconUsers,
@@ -44,9 +43,6 @@ const ACTIONS: Record<Role, { title: string; body: string; href: string; Icon: t
     { title: "Study material", body: "Access free syllabus and sample papers.", href: "/publications", Icon: IconBookOpen },
   ],
 };
-
-// Roles that might actually be an unclaimed school (default signups).
-const CAN_CLAIM: Role[] = ["student", "parent"];
 
 export default async function PortalDashboard() {
   const user = await getCurrentUser();
@@ -101,12 +97,6 @@ export default async function PortalDashboard() {
           </Link>
         ))}
       </div>
-
-      {CAN_CLAIM.includes(role) && (
-        <div className="mt-8">
-          <ClaimSchoolForm />
-        </div>
-      )}
     </div>
   );
 }
